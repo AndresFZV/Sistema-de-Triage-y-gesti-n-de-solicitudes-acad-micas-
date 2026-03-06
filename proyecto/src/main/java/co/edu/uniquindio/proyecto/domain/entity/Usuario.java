@@ -36,4 +36,8 @@ public class Usuario {
     public boolean esEstudiante() {
         return this.tipoUsuario == TipoUsuario.ESTUDIANTE;
     }
+
+    public boolean esDocente() {
+        return this.tipoUsuario == TipoUsuario.DOCENTE;
+    }
 }

@@ -19,11 +19,10 @@ public record EventoHistorial(
             throw new IllegalArgumentException("La fecha del evento es obligatoria");
     }
 
-    // Factory methods para cada tipo de evento
     public static EventoHistorial registrado(String solicitante) {
         return new EventoHistorial(
                 "Solicitud registrada",
-                EstadoSolicitud.PENDIENTE,
+                EstadoSolicitud.CLASIFICACION,
                 solicitante,
                 LocalDateTime.now()
         );
@@ -32,6 +31,15 @@ public record EventoHistorial(
     public static EventoHistorial clasificado(String responsable, TipoSolicitud tipo, Prioridad prioridad) {
         return new EventoHistorial(
                 "Solicitud clasificada como " + tipo + " con prioridad " + prioridad,
+                EstadoSolicitud.PENDIENTE,
+                responsable,
+                LocalDateTime.now()
+        );
+    }
+
+    public static EventoHistorial enRevision(String responsable) {
+        return new EventoHistorial(
+                "Solicitud puesta en revisión",
                 EstadoSolicitud.EN_PROCESO,
                 responsable,
                 LocalDateTime.now()
@@ -61,6 +69,15 @@ public record EventoHistorial(
                 "Solicitud rechazada",
                 EstadoSolicitud.RECHAZADA,
                 responsable,
+                LocalDateTime.now()
+        );
+    }
+
+    public static EventoHistorial cancelado(String solicitante) {
+        return new EventoHistorial(
+                "Solicitud cancelada por el solicitante",
+                EstadoSolicitud.CANCELADA,
+                solicitante,
                 LocalDateTime.now()
         );
     }
