@@ -8,15 +8,22 @@ import co.edu.uniquindio.proyecto.domain.valueobject.TipoSolicitud;
 
 public class GestorSolicitudService {
 
+    private final AsignadorPrioridadService asignadorPrioridad;
+
+    public GestorSolicitudService() {
+        this.asignadorPrioridad = new AsignadorPrioridadService();
+    }
+
     public Solicitud registrar(String descripcion, Usuario solicitante) {
         return new Solicitud(descripcion, solicitante);
     }
 
-    public void clasificar(Solicitud solicitud, TipoSolicitud tipo,
-                           Prioridad prioridad, Usuario quien) {
+    // La prioridad ya no viene de afuera, la calcula el sistema
+    public void clasificar(Solicitud solicitud, TipoSolicitud tipo, Usuario quien) {
         if (!quien.esAdministrativo())
             throw new ReglaDominioException("Solo un administrativo puede clasificar una solicitud");
 
+        Prioridad prioridad = asignadorPrioridad.asignar(tipo, solicitud.getFechaCreacion());
         solicitud.clasificar(tipo, prioridad);
     }
 
