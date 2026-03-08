@@ -7,6 +7,11 @@ import org.junit.jupiter.api.Test;
 import java.time.LocalDateTime;
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Pruebas unitarias para {@link AsignadorPrioridadService}.
+ * Valida las reglas de prioridad base por tipo y las reglas
+ * de envejecimiento por tiempo de espera.
+ */
 class AsignadorPrioridadServiceTest {
 
     private AsignadorPrioridadService asignador;
@@ -19,46 +24,47 @@ class AsignadorPrioridadServiceTest {
     // ---- Prioridad base ----
 
     @Test
+    /** Verifica que HOMOLOGACION tiene prioridad base ALTA. */
     void homologacionDebeSerPrioridadAlta() {
-        Prioridad prioridad = asignador.asignar(TipoSolicitud.HOMOLOGACION, LocalDateTime.now());
-        assertEquals(Prioridad.ALTA, prioridad);
+        assertEquals(Prioridad.ALTA, asignador.asignar(TipoSolicitud.HOMOLOGACION, LocalDateTime.now()));
     }
 
     @Test
+    /** Verifica que SOLICITUD_CUPO tiene prioridad base ALTA. */
     void solicitudCupoDebeSerPrioridadAlta() {
-        Prioridad prioridad = asignador.asignar(TipoSolicitud.SOLICITUD_CUPO, LocalDateTime.now());
-        assertEquals(Prioridad.ALTA, prioridad);
+        assertEquals(Prioridad.ALTA, asignador.asignar(TipoSolicitud.SOLICITUD_CUPO, LocalDateTime.now()));
     }
 
     @Test
+    /** Verifica que CANCELACION tiene prioridad base MEDIA. */
     void cancelacionDebeSerPrioridadMedia() {
-        Prioridad prioridad = asignador.asignar(TipoSolicitud.CANCELACION, LocalDateTime.now());
-        assertEquals(Prioridad.MEDIA, prioridad);
+        assertEquals(Prioridad.MEDIA, asignador.asignar(TipoSolicitud.CANCELACION, LocalDateTime.now()));
     }
 
     @Test
+    /** Verifica que OTRO tiene prioridad base BAJA. */
     void otroDebeSerPrioridadBaja() {
-        Prioridad prioridad = asignador.asignar(TipoSolicitud.OTRO, LocalDateTime.now());
-        assertEquals(Prioridad.BAJA, prioridad);
+        assertEquals(Prioridad.BAJA, asignador.asignar(TipoSolicitud.OTRO, LocalDateTime.now()));
     }
 
     // ---- Envejecimiento ----
 
     @Test
+    /** Verifica que CANCELACION con más de 3 días sube de MEDIA a ALTA. */
     void solicitudConMasDe3DiasDebeSubirUnNivel() {
         LocalDateTime hace4Dias = LocalDateTime.now().minusDays(4);
-        Prioridad prioridad = asignador.asignar(TipoSolicitud.CANCELACION, hace4Dias);
-        assertEquals(Prioridad.ALTA, prioridad);
+        assertEquals(Prioridad.ALTA, asignador.asignar(TipoSolicitud.CANCELACION, hace4Dias));
     }
 
     @Test
+    /** Verifica que OTRO con más de 3 días sube de BAJA a MEDIA. */
     void solicitudConMasDe3DiasDeOtroDebeSubirAMedia() {
         LocalDateTime hace4Dias = LocalDateTime.now().minusDays(4);
-        Prioridad prioridad = asignador.asignar(TipoSolicitud.OTRO, hace4Dias);
-        assertEquals(Prioridad.MEDIA, prioridad);
+        assertEquals(Prioridad.MEDIA, asignador.asignar(TipoSolicitud.OTRO, hace4Dias));
     }
 
     @Test
+    /** Verifica que cualquier tipo con más de 7 días pasa directamente a ALTA. */
     void solicitudConMasDe7DiasDebeSerSiempreAlta() {
         LocalDateTime hace8Dias = LocalDateTime.now().minusDays(8);
         assertEquals(Prioridad.ALTA, asignador.asignar(TipoSolicitud.OTRO, hace8Dias));
@@ -67,9 +73,9 @@ class AsignadorPrioridadServiceTest {
     }
 
     @Test
+    /** Verifica que una prioridad ALTA no cambia con el envejecimiento. */
     void solicitudAltaNoCambiaConEnvejecimiento() {
         LocalDateTime hace4Dias = LocalDateTime.now().minusDays(4);
-        Prioridad prioridad = asignador.asignar(TipoSolicitud.HOMOLOGACION, hace4Dias);
-        assertEquals(Prioridad.ALTA, prioridad);
+        assertEquals(Prioridad.ALTA, asignador.asignar(TipoSolicitud.HOMOLOGACION, hace4Dias));
     }
 }
