@@ -65,6 +65,8 @@ src
 │           │   │   ├── TipoSolicitud.java
 │           │   │   └── TipoUsuario.java
 │           │   ├── service
+│           │   │   ├── GestorSolicitudService.java      # Reglas de roles
+│           │   │   ├── AsignadorPrioridadService.java   # Prioridad automática
 │           │   │   └── NotificadorSolicitudes.java
 │           │   └── exception
 │           │       └── ReglaDominioException.java
@@ -81,6 +83,8 @@ src
                 │   ├── EmailTest.java
                 │   └── CodigoSolicitudTest.java
                 └── service
+                    ├── GestorSolicitudServiceTest.java
+                    ├── AsignadorPrioridadServiceTest.java
                     └── NotificadorSolicitudesTest.java
 ```
 
@@ -93,9 +97,9 @@ La carpeta `/docs` contiene los siguientes artefactos de análisis y diseño:
 | Documento | Descripción |
 |-----------|-------------|
 | `glosario-lenguaje-ubicuo.md` | Definición de todos los términos clave del dominio |
-| `diagrama-clases.md` | Diagrama de clases UML del modelo de dominio |
-| `diagrama-estados.md` | Diagrama del ciclo de vida de una solicitud |
-| `reglas-de-negocio.md` | Documentación completa de las 12 reglas de negocio identificadas |
+| `Diagrama de clases.jpg` | Diagrama de clases UML del modelo de dominio |
+| `Diagrama de estados.jpg` | Diagrama del ciclo de vida de una solicitud |
+| `reglas-de-negocio.md` | Documentación completa de las 18 reglas de negocio identificadas |
 
 ---
 
@@ -135,7 +139,7 @@ target/surefire-reports/
 ### Resultado esperado
 
 ```
-[INFO] Tests run: 22, Failures: 0, Errors: 0, Skipped: 0
+[INFO] Tests run: 35, Failures: 0, Errors: 0, Skipped: 0
 [INFO] BUILD SUCCESS
 ```
 
@@ -159,10 +163,19 @@ target/surefire-reports/
 ## Decisiones de Diseño
 
 **¿Por qué MongoDB en lugar de H2?**  
-MongoDB es una base de datos documental que se adapta naturalmente al modelo de agregados de DDD. Un documento de solicitud puede contener su historial embebido, respetando los límites del agregado.
+MongoDB es una base de datos documental que se adapta naturalmente al modelo de agregados de DDD. Un documento de solicitud puede contener su historial embebido, respetando los límites del agregado sin necesidad de joins.
 
 **¿Por qué `record` para los Value Objects?**  
 Los `record` de Java garantizan inmutabilidad, generan automáticamente `equals()`, `hashCode()` y `toString()` por valor, y permiten validación en el constructor compacto. Esto los hace ideales para Value Objects.
 
 **¿Por qué los métodos de negocio viven dentro de las entidades?**  
 Siguiendo el principio "Tell, don't ask" y evitando el antipatrón de Modelo Anémico. Las reglas del negocio viven junto a los datos que gobiernan, haciendo el sistema más expresivo, cohesivo y fácil de mantener.
+
+**¿Por qué las reglas de roles están en `GestorSolicitudService` y no en `Solicitud`?**  
+`Solicitud` no debería saber nada sobre roles de usuarios. Su responsabilidad es gestionar su propio ciclo de vida. Las reglas de quién puede hacer qué son reglas del proceso, no invariantes del agregado. Por eso viven en un Servicio de Dominio separado.
+
+**¿Por qué la prioridad la asigna el sistema automáticamente?**  
+Para evitar sesgos humanos y garantizar consistencia. El `AsignadorPrioridadService` aplica reglas objetivas basadas en el tipo de solicitud y el tiempo de espera, incluyendo envejecimiento de prioridad para evitar que solicitudes de baja prioridad queden indefinidamente sin atender.
+
+**¿Por qué `LinkedHashSet` para el historial?**  
+Porque el historial necesita dos garantías simultáneas: orden cronológico de inserción y ausencia de duplicados. `LinkedHashSet` es la única colección de Java que ofrece ambas a la vez.
