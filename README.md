@@ -8,8 +8,8 @@
 
 ## Integrantes
 
-| Nombre | Código |
-|--------|--------|
+| Nombre |
+|--------|
 | Andrés Felipe Zambrano Velasquez |
 | Angelica María Reyes Barbosa |
 
