@@ -1,11 +1,9 @@
 package co.edu.uniquindio.proyecto.domain.valueobject;
 
-import co.edu.uniquindio.proyecto.domain.service.AsignadorPrioridadService;
-
 /**
  * Value Object que clasifica el propósito de una solicitud académica.
  * Es asignado por un administrativo durante la clasificación y determina
- * la prioridad base calculada por {@link AsignadorPrioridadService}.
+ * la prioridad base calculada por {@link Prioridad}.
  *
  * <p>Es un conjunto cerrado de valores inmutables.</p>
  */

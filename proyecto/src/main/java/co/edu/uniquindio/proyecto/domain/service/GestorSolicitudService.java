@@ -15,8 +15,6 @@ import co.edu.uniquindio.proyecto.domain.valueobject.TipoSolicitud;
  * separando esta preocupación del agregado {@link Solicitud}, que solo
  * valida <b>desde qué estado</b> se puede ejecutar cada acción.</p>
  *
- * <p>Coordina el uso de {@link AsignadorPrioridadService} para calcular
- * automáticamente la prioridad durante la clasificación.</p>
  *
  * <p>Reglas de roles:</p>
  * <ul>
@@ -27,16 +25,6 @@ import co.edu.uniquindio.proyecto.domain.valueobject.TipoSolicitud;
  * </ul>
  */
 public class GestorSolicitudService {
-
-    /** Servicio que calcula la prioridad automáticamente. */
-    private final AsignadorPrioridadService asignadorPrioridad;
-
-    /**
-     * Crea una nueva instancia del gestor con su servicio de prioridad.
-     */
-    public GestorSolicitudService() {
-        this.asignadorPrioridad = new AsignadorPrioridadService();
-    }
 
     /**
      * Registra una nueva solicitud. Cualquier usuario puede registrar.
@@ -49,20 +37,13 @@ public class GestorSolicitudService {
         return new Solicitud(descripcion, solicitante);
     }
 
-    /**
-     * Clasifica una solicitud asignándole un tipo. La prioridad es calculada
-     * automáticamente por {@link AsignadorPrioridadService}.
-     *
-     * @param solicitud Solicitud a clasificar.
-     * @param tipo      Tipo asignado a la solicitud.
-     * @param quien     Usuario que ejecuta la acción. Debe ser administrativo.
-     * @throws ReglaDominioException si quien clasifica no es administrativo.
-     */
+
     public void clasificar(Solicitud solicitud, TipoSolicitud tipo, Usuario quien) {
         if (!quien.esAdministrativo())
             throw new ReglaDominioException("Solo un administrativo puede clasificar una solicitud");
 
-        Prioridad prioridad = asignadorPrioridad.asignar(tipo, solicitud.getFechaCreacion());
+        // Ya no necesita AsignadorPrioridadService
+        Prioridad prioridad = Prioridad.calcular(tipo, solicitud.getFechaCreacion());
         solicitud.clasificar(tipo, prioridad);
     }
 

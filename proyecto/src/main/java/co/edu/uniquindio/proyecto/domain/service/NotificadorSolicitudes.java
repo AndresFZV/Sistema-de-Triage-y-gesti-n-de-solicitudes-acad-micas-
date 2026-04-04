@@ -6,12 +6,12 @@ import co.edu.uniquindio.proyecto.domain.valueobject.TipoNotificacion;
 import java.util.List;
 
 /**
- * Servicio de dominio que determina a quién se debe notificar
+ * Clase utilitaria que determina a quién se debe notificar
  * según el tipo de evento ocurrido sobre una solicitud.
  *
  * <p>Coordina información del solicitante y el responsable sin pertenecer
  * naturalmente a ninguna de las dos entidades. Por eso vive como
- * servicio de dominio independiente.</p>
+ * clase utilitaria con métodos estáticos.</p>
  *
  * <p>Reglas de notificación:</p>
  * <ul>
@@ -21,7 +21,10 @@ import java.util.List;
  *   <li>{@link TipoNotificacion#CIERRE} → solicitante y responsable.</li>
  * </ul>
  */
-public class NotificadorSolicitudes {
+public final class NotificadorSolicitudes {
+
+    /** Constructor privado: esta clase no debe ser instanciada. */
+    private NotificadorSolicitudes() {}
 
     /**
      * Determina la lista de emails a notificar según el tipo de evento.
@@ -30,19 +33,12 @@ public class NotificadorSolicitudes {
      * @param tipo      El tipo de notificación a enviar.
      * @return Lista de direcciones de email de los destinatarios.
      */
-    public List<String> determinarDestinatarios(Solicitud solicitud, TipoNotificacion tipo) {
+    public static List<String> determinarDestinatarios(Solicitud solicitud, TipoNotificacion tipo) {
         return switch (tipo) {
-            case NUEVA_SOLICITUD -> List.of(
+            case NUEVA_SOLICITUD, CAMBIO_ESTADO -> List.of(
                     solicitud.getSolicitante().getEmail().valor()
             );
-            case ASIGNACION -> List.of(
-                    solicitud.getSolicitante().getEmail().valor(),
-                    solicitud.getResponsable().getEmail().valor()
-            );
-            case CAMBIO_ESTADO -> List.of(
-                    solicitud.getSolicitante().getEmail().valor()
-            );
-            case CIERRE -> List.of(
+            case ASIGNACION, CIERRE -> List.of(
                     solicitud.getSolicitante().getEmail().valor(),
                     solicitud.getResponsable().getEmail().valor()
             );

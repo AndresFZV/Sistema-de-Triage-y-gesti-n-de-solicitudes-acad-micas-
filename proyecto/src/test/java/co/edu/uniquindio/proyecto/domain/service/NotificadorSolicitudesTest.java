@@ -15,13 +15,12 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 class NotificadorSolicitudesTest {
 
-    private NotificadorSolicitudes notificador;
     private Usuario estudiante;
     private Usuario administrativo;
 
     @BeforeEach
     void setUp() {
-        notificador = new NotificadorSolicitudes();
+        // NotificadorSolicitudes es utilitaria, no se instancia
         estudiante = new Usuario("U-001", "Juan Pérez",
                 new Email("juan@uniquindio.edu.co"), TipoUsuario.ESTUDIANTE);
         administrativo = new Usuario("U-002", "Ana Gómez",
@@ -32,9 +31,11 @@ class NotificadorSolicitudesTest {
     /** Verifica que al registrar una solicitud solo se notifica al solicitante. */
     void debeNotificarSolicitanteEnNuevaSolicitud() {
         Solicitud solicitud = new Solicitud("Homologación", estudiante);
-        List<String> destinatarios = notificador.determinarDestinatarios(
+
+        List<String> destinatarios = NotificadorSolicitudes.determinarDestinatarios(
                 solicitud, TipoNotificacion.NUEVA_SOLICITUD
         );
+
         assertTrue(destinatarios.contains("juan@uniquindio.edu.co"));
     }
 
@@ -45,7 +46,7 @@ class NotificadorSolicitudesTest {
         solicitud.clasificar(TipoSolicitud.HOMOLOGACION, Prioridad.ALTA);
         solicitud.enRevision(administrativo);
 
-        List<String> destinatarios = notificador.determinarDestinatarios(
+        List<String> destinatarios = NotificadorSolicitudes.determinarDestinatarios(
                 solicitud, TipoNotificacion.ASIGNACION
         );
 
@@ -57,9 +58,11 @@ class NotificadorSolicitudesTest {
     /** Verifica que en un cambio de estado solo se notifica al solicitante. */
     void debeNotificarSolicitanteEnCambioEstado() {
         Solicitud solicitud = new Solicitud("Homologación", estudiante);
-        List<String> destinatarios = notificador.determinarDestinatarios(
+
+        List<String> destinatarios = NotificadorSolicitudes.determinarDestinatarios(
                 solicitud, TipoNotificacion.CAMBIO_ESTADO
         );
+
         assertTrue(destinatarios.contains("juan@uniquindio.edu.co"));
     }
 
@@ -72,7 +75,7 @@ class NotificadorSolicitudesTest {
         solicitud.atendida();
         solicitud.cerrar();
 
-        List<String> destinatarios = notificador.determinarDestinatarios(
+        List<String> destinatarios = NotificadorSolicitudes.determinarDestinatarios(
                 solicitud, TipoNotificacion.CIERRE
         );
 

@@ -1,7 +1,6 @@
 package co.edu.uniquindio.proyecto.domain.entity;
 
 import co.edu.uniquindio.proyecto.domain.exception.ReglaDominioException;
-import co.edu.uniquindio.proyecto.domain.service.AsignadorPrioridadService;
 import co.edu.uniquindio.proyecto.domain.service.GestorSolicitudService;
 import co.edu.uniquindio.proyecto.domain.valueobject.*;
 import lombok.Getter;
@@ -95,7 +94,7 @@ public class Solicitud {
      * a {@link EstadoSolicitud#PENDIENTE}.
      *
      * @param tipo      Tipo de la solicitud. No puede ser nulo.
-     * @param prioridad Prioridad calculada por {@link AsignadorPrioridadService}. No puede ser nula.
+     * @param prioridad Prioridad calculada por {@link Prioridad}. No puede ser nula.
      * @throws ReglaDominioException si el estado no es {@code CLASIFICACION},
      *                               o si el tipo o prioridad son nulos.
      */

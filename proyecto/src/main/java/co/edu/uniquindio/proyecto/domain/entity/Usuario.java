@@ -73,4 +73,13 @@ public class Usuario {
     public boolean esEstudiante() {
         return this.tipoUsuario == TipoUsuario.ESTUDIANTE;
     }
+
+    /**
+     * Indica si este usuario tiene rol de docente.
+     *
+     * @return {@code true} si el tipo de usuario es {@link TipoUsuario#DOCENTE}.
+     */
+    public boolean esDocente() {
+        return this.tipoUsuario == TipoUsuario.DOCENTE;
+    }
 }
