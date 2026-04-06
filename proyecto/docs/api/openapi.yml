@@ -1,0 +1,623 @@
+openapi: 3.0.3
+info:
+  title: API de Solicitudes Académicas
+  description: |
+    API REST para la gestión del ciclo de vida de solicitudes académicas.
+
+    ## Roles
+    - **ESTUDIANTE**: puede registrar y cancelar sus propias solicitudes.
+    - **ADMINISTRATIVO**: puede clasificar, poner en revisión, atender, rechazar y cerrar solicitudes.
+
+    ## Ciclo de vida de una solicitud
+    ```
+    CLASIFICACION → PENDIENTE → EN_PROCESO → ATENDIDA  → CERRADA
+                                           → RECHAZADA → CERRADA
+                  → CANCELADA (solo el solicitante, desde PENDIENTE)
+    ```
+  version: 1.0.0
+  contact:
+    name: Universidad del Quindío
+
+servers:
+  - url: http://localhost:8080/api
+    description: Servidor de desarrollo local
+
+tags:
+  - name: Usuarios
+    description: Gestión de usuarios del sistema
+  - name: Solicitudes
+    description: Ciclo de vida de solicitudes académicas
+
+# ─────────────────────────────────────────
+# PATHS
+# ─────────────────────────────────────────
+paths:
+
+  # ── USUARIOS ──────────────────────────
+  /usuarios:
+    post:
+      tags: [Usuarios]
+      summary: Crear usuario
+      description: Registra un nuevo usuario en el sistema.
+      operationId: crearUsuario
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CrearUsuarioRequest'
+            example:
+              nombre: "María López"
+              email: "maria.lopez@uniquindio.edu.co"
+              tipoUsuario: "ESTUDIANTE"
+      responses:
+        '201':
+          description: Usuario creado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UsuarioResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          description: Ya existe un usuario con ese email
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    get:
+      tags: [Usuarios]
+      summary: Listar usuarios
+      description: Retorna todos los usuarios registrados. Solo accesible por administrativos.
+      operationId: listarUsuarios
+      parameters:
+        - name: tipoUsuario
+          in: query
+          required: false
+          description: Filtra por tipo de usuario
+          schema:
+            $ref: '#/components/schemas/TipoUsuario'
+      responses:
+        '200':
+          description: Lista de usuarios
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UsuarioResponse'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /usuarios/{id}:
+    get:
+      tags: [Usuarios]
+      summary: Obtener usuario por ID
+      operationId: obtenerUsuario
+      parameters:
+        - $ref: '#/components/parameters/IdUsuario'
+      responses:
+        '200':
+          description: Usuario encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UsuarioResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ── SOLICITUDES ───────────────────────
+  /solicitudes:
+    post:
+      tags: [Solicitudes]
+      summary: Registrar solicitud
+      description: Cualquier usuario puede registrar una nueva solicitud. El estado inicial es CLASIFICACION.
+      operationId: registrarSolicitud
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegistrarSolicitudRequest'
+            example:
+              descripcion: "Solicito homologación de la materia Cálculo I cursada en otra institución."
+              solicitanteId: "usr-001"
+      responses:
+        '201':
+          description: Solicitud registrada exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SolicitudResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          description: El solicitante no existe
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    get:
+      tags: [Solicitudes]
+      summary: Listar solicitudes
+      description: Lista solicitudes con filtros opcionales. Los estudiantes solo ven las suyas.
+      operationId: listarSolicitudes
+      parameters:
+        - name: estado
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/EstadoSolicitud'
+        - name: prioridad
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/Prioridad'
+        - name: tipoSolicitud
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/TipoSolicitud'
+        - name: solicitanteId
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Lista de solicitudes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SolicitudResponse'
+
+  /solicitudes/{codigo}:
+    get:
+      tags: [Solicitudes]
+      summary: Obtener solicitud por código
+      operationId: obtenerSolicitud
+      parameters:
+        - $ref: '#/components/parameters/CodigoSolicitud'
+      responses:
+        '200':
+          description: Solicitud encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SolicitudResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /solicitudes/{codigo}/clasificar:
+    patch:
+      tags: [Solicitudes]
+      summary: Clasificar solicitud
+      description: |
+        Asigna un tipo a la solicitud. La prioridad se calcula automáticamente.
+        **Solo administrativos.** Estado requerido: `CLASIFICACION`.
+      operationId: clasificarSolicitud
+      parameters:
+        - $ref: '#/components/parameters/CodigoSolicitud'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClasificarSolicitudRequest'
+            example:
+              tipo: "HOMOLOGACION"
+              administrativoId: "usr-admin-001"
+      responses:
+        '200':
+          description: Solicitud clasificada — estado cambia a PENDIENTE
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SolicitudResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ReglaDominio'
+
+  /solicitudes/{codigo}/revision:
+    patch:
+      tags: [Solicitudes]
+      summary: Poner solicitud en revisión
+      description: |
+        Asigna un responsable y pone la solicitud en revisión.
+        **Solo administrativos.** Estado requerido: `PENDIENTE`.
+      operationId: enRevisionSolicitud
+      parameters:
+        - $ref: '#/components/parameters/CodigoSolicitud'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AsignarResponsableRequest'
+            example:
+              responsableId: "usr-admin-002"
+      responses:
+        '200':
+          description: Solicitud en revisión — estado cambia a EN_PROCESO
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SolicitudResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ReglaDominio'
+
+  /solicitudes/{codigo}/atender:
+    patch:
+      tags: [Solicitudes]
+      summary: Marcar solicitud como atendida
+      description: |
+        Marca la solicitud como atendida por el responsable.
+        **Solo administrativos.** Estado requerido: `EN_PROCESO`.
+      operationId: atenderSolicitud
+      parameters:
+        - $ref: '#/components/parameters/CodigoSolicitud'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccionAdministrativoRequest'
+      responses:
+        '200':
+          description: Solicitud atendida — estado cambia a ATENDIDA
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SolicitudResponse'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ReglaDominio'
+
+  /solicitudes/{codigo}/rechazar:
+    patch:
+      tags: [Solicitudes]
+      summary: Rechazar solicitud
+      description: |
+        Rechaza la solicitud durante la revisión.
+        **Solo administrativos.** Estado requerido: `EN_PROCESO`.
+      operationId: rechazarSolicitud
+      parameters:
+        - $ref: '#/components/parameters/CodigoSolicitud'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccionAdministrativoRequest'
+      responses:
+        '200':
+          description: Solicitud rechazada — estado cambia a RECHAZADA
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SolicitudResponse'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ReglaDominio'
+
+  /solicitudes/{codigo}/cerrar:
+    patch:
+      tags: [Solicitudes]
+      summary: Cerrar solicitud
+      description: |
+        Cierra definitivamente la solicitud.
+        **Solo administrativos.** Estado requerido: `ATENDIDA` o `RECHAZADA`.
+      operationId: cerrarSolicitud
+      parameters:
+        - $ref: '#/components/parameters/CodigoSolicitud'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccionAdministrativoRequest'
+      responses:
+        '200':
+          description: Solicitud cerrada — estado cambia a CERRADA
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SolicitudResponse'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ReglaDominio'
+
+  /solicitudes/{codigo}/cancelar:
+    patch:
+      tags: [Solicitudes]
+      summary: Cancelar solicitud
+      description: |
+        Cancela la solicitud. **Solo el solicitante original** puede cancelar
+        su propia solicitud. Estado requerido: `PENDIENTE`.
+      operationId: cancelarSolicitud
+      parameters:
+        - $ref: '#/components/parameters/CodigoSolicitud'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CancelarSolicitudRequest'
+            example:
+              solicitanteId: "usr-001"
+      responses:
+        '200':
+          description: Solicitud cancelada — estado cambia a CANCELADA
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SolicitudResponse'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ReglaDominio'
+
+  /solicitudes/{codigo}/historial:
+    get:
+      tags: [Solicitudes]
+      summary: Obtener historial de una solicitud
+      description: Retorna todos los eventos registrados en el historial de la solicitud.
+      operationId: obtenerHistorial
+      parameters:
+        - $ref: '#/components/parameters/CodigoSolicitud'
+      responses:
+        '200':
+          description: Historial de eventos
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EventoHistorialResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+# ─────────────────────────────────────────
+# COMPONENTS
+# ─────────────────────────────────────────
+components:
+
+  # ── PARAMETERS ────────────────────────
+  parameters:
+    CodigoSolicitud:
+      name: codigo
+      in: path
+      required: true
+      description: Código único de la solicitud (ej. SOL-20240101-0001)
+      schema:
+        type: string
+        example: "SOL-20240101-0001"
+
+    IdUsuario:
+      name: id
+      in: path
+      required: true
+      description: Identificador único del usuario
+      schema:
+        type: string
+        example: "usr-001"
+
+  # ── SCHEMAS ───────────────────────────
+  schemas:
+
+    # Enumeraciones
+    TipoUsuario:
+      type: string
+      enum: [ESTUDIANTE, ADMINISTRATIVO]
+      description: Rol del usuario en el sistema
+
+    TipoSolicitud:
+      type: string
+      enum: [HOMOLOGACION, SOLICITUD_CUPO, CANCELACION, OTRO]
+      description: Categoría de la solicitud académica
+
+    EstadoSolicitud:
+      type: string
+      enum: [CLASIFICACION, PENDIENTE, EN_PROCESO, ATENDIDA, RECHAZADA, CERRADA, CANCELADA]
+      description: Estado actual en el ciclo de vida de la solicitud
+
+    Prioridad:
+      type: string
+      enum: [ALTA, MEDIA, BAJA]
+      description: Nivel de urgencia calculado automáticamente por el sistema
+
+    # Requests
+    CrearUsuarioRequest:
+      type: object
+      required: [nombre, email, tipoUsuario]
+      properties:
+        nombre:
+          type: string
+          minLength: 1
+          example: "María López"
+        email:
+          type: string
+          format: email
+          example: "maria.lopez@uniquindio.edu.co"
+        tipoUsuario:
+          $ref: '#/components/schemas/TipoUsuario'
+
+    RegistrarSolicitudRequest:
+      type: object
+      required: [descripcion, solicitanteId]
+      properties:
+        descripcion:
+          type: string
+          minLength: 1
+          example: "Solicito homologación de la materia Cálculo I."
+        solicitanteId:
+          type: string
+          example: "usr-001"
+
+    ClasificarSolicitudRequest:
+      type: object
+      required: [tipo, administrativoId]
+      properties:
+        tipo:
+          $ref: '#/components/schemas/TipoSolicitud'
+        administrativoId:
+          type: string
+          example: "usr-admin-001"
+
+    AsignarResponsableRequest:
+      type: object
+      required: [responsableId]
+      properties:
+        responsableId:
+          type: string
+          example: "usr-admin-002"
+
+    AccionAdministrativoRequest:
+      type: object
+      required: [administrativoId]
+      properties:
+        administrativoId:
+          type: string
+          example: "usr-admin-001"
+
+    CancelarSolicitudRequest:
+      type: object
+      required: [solicitanteId]
+      properties:
+        solicitanteId:
+          type: string
+          example: "usr-001"
+
+    # Responses
+    UsuarioResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "usr-001"
+        nombre:
+          type: string
+          example: "María López"
+        email:
+          type: string
+          format: email
+          example: "maria.lopez@uniquindio.edu.co"
+        tipoUsuario:
+          $ref: '#/components/schemas/TipoUsuario'
+
+    SolicitudResponse:
+      type: object
+      properties:
+        codigo:
+          type: string
+          example: "SOL-20240101-0001"
+        descripcion:
+          type: string
+          example: "Solicito homologación de la materia Cálculo I."
+        estado:
+          $ref: '#/components/schemas/EstadoSolicitud'
+        tipoSolicitud:
+          $ref: '#/components/schemas/TipoSolicitud'
+        prioridad:
+          $ref: '#/components/schemas/Prioridad'
+        fechaCreacion:
+          type: string
+          format: date-time
+          example: "2024-01-15T10:30:00"
+        solicitante:
+          $ref: '#/components/schemas/UsuarioResponse'
+        responsable:
+          $ref: '#/components/schemas/UsuarioResponse'
+          nullable: true
+
+    EventoHistorialResponse:
+      type: object
+      properties:
+        descripcion:
+          type: string
+          example: "Solicitud registrada por María López"
+        fecha:
+          type: string
+          format: date-time
+          example: "2024-01-15T10:30:00"
+
+    ErrorResponse:
+      type: object
+      properties:
+        mensaje:
+          type: string
+          example: "El solicitante no existe en el sistema"
+        codigo:
+          type: string
+          example: "USUARIO_NO_ENCONTRADO"
+        timestamp:
+          type: string
+          format: date-time
+
+  # ── RESPONSES ─────────────────────────
+  responses:
+    BadRequest:
+      description: Datos de entrada inválidos
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            mensaje: "La descripción no puede estar vacía"
+            codigo: "DATOS_INVALIDOS"
+
+    Forbidden:
+      description: El usuario no tiene permisos para ejecutar esta acción
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            mensaje: "Solo un administrativo puede clasificar una solicitud"
+            codigo: "ACCION_NO_PERMITIDA"
+
+    NotFound:
+      description: El recurso no fue encontrado
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            mensaje: "No se encontró la solicitud con código SOL-20240101-0001"
+            codigo: "RECURSO_NO_ENCONTRADO"
+
+    ReglaDominio:
+      description: La acción viola una regla de negocio del dominio
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            mensaje: "Solo se puede clasificar una solicitud en estado CLASIFICACION"
+            codigo: "REGLA_DOMINIO_VIOLADA"
