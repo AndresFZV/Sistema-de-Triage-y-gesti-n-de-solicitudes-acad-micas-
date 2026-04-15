@@ -59,12 +59,18 @@ paths:
                 $ref: '#/components/schemas/UsuarioResponse'
         '400':
           $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
         '409':
           description: Ya existe un usuario con ese email
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
 
     get:
       tags: [Usuarios]
@@ -78,17 +84,22 @@ paths:
           description: Filtra por tipo de usuario
           schema:
             $ref: '#/components/schemas/TipoUsuario'
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Size'
+        - $ref: '#/components/parameters/Sort'
       responses:
         '200':
-          description: Lista de usuarios
+          description: Lista paginada de usuarios
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/UsuarioResponse'
+                $ref: '#/components/schemas/UsuarioPageResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
 
   /usuarios/{id}:
     get:
@@ -104,8 +115,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UsuarioResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
 
   # ── SOLICITUDES ───────────────────────
   /solicitudes:
@@ -132,12 +149,16 @@ paths:
                 $ref: '#/components/schemas/SolicitudResponse'
         '400':
           $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '404':
           description: El solicitante no existe
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
 
     get:
       tags: [Solicitudes]
@@ -165,15 +186,22 @@ paths:
           required: false
           schema:
             type: string
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Size'
+        - $ref: '#/components/parameters/Sort'
       responses:
         '200':
-          description: Lista de solicitudes
+          description: Lista paginada de solicitudes
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/SolicitudResponse'
+                $ref: '#/components/schemas/SolicitudPageResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
 
   /solicitudes/{codigo}:
     get:
@@ -189,8 +217,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SolicitudResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
 
   /solicitudes/{codigo}/clasificar:
     patch:
@@ -220,12 +254,16 @@ paths:
                 $ref: '#/components/schemas/SolicitudResponse'
         '400':
           $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
         '422':
           $ref: '#/components/responses/ReglaDominio'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
 
   /solicitudes/{codigo}/revision:
     patch:
@@ -254,12 +292,16 @@ paths:
                 $ref: '#/components/schemas/SolicitudResponse'
         '400':
           $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
         '422':
           $ref: '#/components/responses/ReglaDominio'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
 
   /solicitudes/{codigo}/atender:
     patch:
@@ -284,12 +326,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SolicitudResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
         '422':
           $ref: '#/components/responses/ReglaDominio'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
 
   /solicitudes/{codigo}/rechazar:
     patch:
@@ -314,12 +360,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SolicitudResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
         '422':
           $ref: '#/components/responses/ReglaDominio'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
 
   /solicitudes/{codigo}/cerrar:
     patch:
@@ -344,12 +394,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SolicitudResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
         '422':
           $ref: '#/components/responses/ReglaDominio'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
 
   /solicitudes/{codigo}/cancelar:
     patch:
@@ -376,12 +430,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SolicitudResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
         '422':
           $ref: '#/components/responses/ReglaDominio'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
 
   /solicitudes/{codigo}/historial:
     get:
@@ -400,8 +458,14 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/EventoHistorialResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
 
 # ─────────────────────────────────────────
 # COMPONENTS
@@ -428,13 +492,45 @@ components:
         type: string
         example: "usr-001"
 
+    Page:
+      name: page
+      in: query
+      required: false
+      description: Número de página (comienza en 0)
+      schema:
+        type: integer
+        minimum: 0
+        default: 0
+        example: 0
+
+    Size:
+      name: size
+      in: query
+      required: false
+      description: Cantidad de elementos por página
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 10
+        example: 10
+
+    Sort:
+      name: sort
+      in: query
+      required: false
+      description: Campo y dirección de ordenamiento (ej. fechaCreacion,desc)
+      schema:
+        type: string
+        example: "fechaCreacion,desc"
+
   # ── SCHEMAS ───────────────────────────
   schemas:
 
     # Enumeraciones
     TipoUsuario:
       type: string
-      enum: [ESTUDIANTE, ADMINISTRATIVO]
+      enum: [ESTUDIANTE, DOCENTE, ADMINISTRATIVO]
       description: Rol del usuario en el sistema
 
     TipoSolicitud:
@@ -451,6 +547,58 @@ components:
       type: string
       enum: [ALTA, MEDIA, BAJA]
       description: Nivel de urgencia calculado automáticamente por el sistema
+
+    # Paginación
+    PageMetadata:
+      type: object
+      description: Metadatos de paginación incluidos en todas las respuestas paginadas
+      properties:
+        totalElementos:
+          type: integer
+          description: Total de elementos en la base de datos
+          example: 47
+        totalPaginas:
+          type: integer
+          description: Total de páginas disponibles
+          example: 5
+        paginaActual:
+          type: integer
+          description: Número de la página actual (comienza en 0)
+          example: 0
+        tamañoPagina:
+          type: integer
+          description: Cantidad de elementos por página
+          example: 10
+        primera:
+          type: boolean
+          description: Indica si es la primera página
+          example: true
+        ultima:
+          type: boolean
+          description: Indica si es la última página
+          example: false
+
+    SolicitudPageResponse:
+      type: object
+      description: Respuesta paginada de solicitudes
+      properties:
+        contenido:
+          type: array
+          items:
+            $ref: '#/components/schemas/SolicitudResponse'
+        paginacion:
+          $ref: '#/components/schemas/PageMetadata'
+
+    UsuarioPageResponse:
+      type: object
+      description: Respuesta paginada de usuarios
+      properties:
+        contenido:
+          type: array
+          items:
+            $ref: '#/components/schemas/UsuarioResponse'
+        paginacion:
+          $ref: '#/components/schemas/PageMetadata'
 
     # Requests
     CrearUsuarioRequest:
@@ -562,6 +710,11 @@ components:
         descripcion:
           type: string
           example: "Solicitud registrada por María López"
+        estadoResultante:
+          $ref: '#/components/schemas/EstadoSolicitud'
+        realizadoPor:
+          type: string
+          example: "María López"
         fecha:
           type: string
           format: date-time
@@ -592,8 +745,18 @@ components:
             mensaje: "La descripción no puede estar vacía"
             codigo: "DATOS_INVALIDOS"
 
+    Unauthorized:
+      description: No autenticado — el usuario no ha iniciado sesión o su sesión expiró
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            mensaje: "Debe autenticarse para acceder a este recurso"
+            codigo: "NO_AUTENTICADO"
+
     Forbidden:
-      description: El usuario no tiene permisos para ejecutar esta acción
+      description: No autorizado — el usuario no tiene permisos para ejecutar esta acción
       content:
         application/json:
           schema:
@@ -621,3 +784,13 @@ components:
           example:
             mensaje: "Solo se puede clasificar una solicitud en estado CLASIFICACION"
             codigo: "REGLA_DOMINIO_VIOLADA"
+
+    InternalServerError:
+      description: Error interno del servidor — ocurrió un error inesperado
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            mensaje: "Ocurrió un error inesperado. Por favor intente más tarde"
+            codigo: "ERROR_INTERNO"

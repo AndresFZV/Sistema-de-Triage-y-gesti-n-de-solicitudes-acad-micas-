@@ -7,15 +7,15 @@ import co.edu.uniquindio.proyecto.domain.repository.UsuarioRepository;
 import co.edu.uniquindio.proyecto.domain.service.GestorSolicitudService;
 import co.edu.uniquindio.proyecto.domain.valueobject.CodigoSolicitud;
 
-public class CerrarSolicitudUseCase {
+public class RechazarSolicitudUseCase {
 
     private final SolicitudRepository solicitudRepository;
     private final UsuarioRepository usuarioRepository;
     private final GestorSolicitudService gestor;
 
-    public CerrarSolicitudUseCase(SolicitudRepository solicitudRepository,
-                                  UsuarioRepository usuarioRepository,
-                                  GestorSolicitudService gestor) {
+    public RechazarSolicitudUseCase(SolicitudRepository solicitudRepository,
+                                    UsuarioRepository usuarioRepository,
+                                    GestorSolicitudService gestor) {
         this.solicitudRepository = solicitudRepository;
         this.usuarioRepository = usuarioRepository;
         this.gestor = gestor;
@@ -24,7 +24,7 @@ public class CerrarSolicitudUseCase {
     public void ejecutar(String codigo, String adminId) {
         Solicitud solicitud = solicitudRepository.obtenerPorCodigo(new CodigoSolicitud(codigo));
         Usuario admin = usuarioRepository.obtenerPorId(adminId);
-        gestor.cerrar(solicitud, admin);
+        gestor.rechazar(solicitud, admin);
         solicitudRepository.guardar(solicitud);
     }
 }
