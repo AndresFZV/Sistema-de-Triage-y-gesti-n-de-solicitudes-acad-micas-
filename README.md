@@ -70,7 +70,26 @@ src
 │           │   │   └── NotificadorSolicitudes.java
 │           │   └── exception
 │           │       └── ReglaDominioException.java
-│           ├── application              # Casos de uso (próximas entregas)
+│           ├── application
+│           │   ├── dto
+│           │   │   ├── request
+│           │   │   │   ├── AtenderRequest.java
+│           │   │   │   ├── CancelarRequest.java
+│           │   │   │   ├── CerrarRequest.java
+│           │   │   │   ├── ClasificarSolicitudRequest.java
+│           │   │   │   ├── CrearSolicitudRequest.java
+│           │   │   │   └── EnRevisionRequest.java
+│           │   │   └── response
+│           │   │       └── SolicitudResponse.java
+│           │   └── usecase
+│           │       ├── AtenderSolicitudUseCase.java
+│           │       ├── CancelarSolicitudUseCase.java
+│           │       ├── CerrarSolicitudUseCase.java
+│           │       ├── ClasificarSolicitudUseCase.java
+│           │       ├── ConsultarSolicitudesPorEstadoUseCase.java
+│           │       ├── CrearSolicitudUseCase.java
+│           │       ├── EnRevisionUseCase.java
+│           │       └── RechazarSolicitudUseCase.java
 │           └── infrastructure          # Persistencia y REST (próximas entregas)
 └── test
     └── java
@@ -97,9 +116,45 @@ La carpeta `/docs` contiene los siguientes artefactos de análisis y diseño:
 | Documento | Descripción |
 |-----------|-------------|
 | `glosario-lenguaje-ubicuo.md` | Definición de todos los términos clave del dominio |
-| `Diagrama de clases.jpg` | Diagrama de clases UML del modelo de dominio |
-| `Diagrama de estados.jpg` | Diagrama del ciclo de vida de una solicitud |
+| `diagrama-clases.md` | Diagrama de clases UML del modelo de dominio |
+| `diagrama-estados.md` | Diagrama del ciclo de vida de una solicitud |
 | `reglas-de-negocio.md` | Documentación completa de las 18 reglas de negocio identificadas |
+| `api.yml` | Especificación OpenAPI 3.0 de todos los endpoints REST del sistema |
+
+### API REST
+
+El archivo `api.yml` documenta todos los endpoints del sistema siguiendo el estándar OpenAPI 3.0. Puede visualizarse en [Swagger Editor](https://editor.swagger.io) pegando el contenido del archivo.
+
+**Endpoints disponibles:**
+
+| Método | Endpoint | Descripción | Rol requerido |
+|--------|----------|-------------|---------------|
+| `POST` | `/api/solicitudes` | Registrar nueva solicitud | Cualquier usuario |
+| `GET` | `/api/solicitudes` | Listar solicitudes (paginado) | Cualquier usuario |
+| `GET` | `/api/solicitudes/{codigo}` | Obtener solicitud por código | Cualquier usuario |
+| `PATCH` | `/api/solicitudes/{codigo}/clasificar` | Clasificar solicitud | Administrativo |
+| `PATCH` | `/api/solicitudes/{codigo}/revision` | Poner en revisión | Administrativo |
+| `PATCH` | `/api/solicitudes/{codigo}/atender` | Marcar como atendida | Administrativo |
+| `PATCH` | `/api/solicitudes/{codigo}/rechazar` | Rechazar solicitud | Administrativo |
+| `PATCH` | `/api/solicitudes/{codigo}/cerrar` | Cerrar solicitud | Administrativo |
+| `PATCH` | `/api/solicitudes/{codigo}/cancelar` | Cancelar solicitud | Solicitante original |
+| `GET` | `/api/solicitudes/{codigo}/historial` | Ver historial de eventos | Cualquier usuario |
+| `POST` | `/api/usuarios` | Crear usuario | Cualquier usuario |
+| `GET` | `/api/usuarios` | Listar usuarios (paginado) | Administrativo |
+| `GET` | `/api/usuarios/{id}` | Obtener usuario por ID | Cualquier usuario |
+
+**Códigos de respuesta estandarizados:**
+
+| Código | Significado |
+|--------|-------------|
+| `200` | Operación exitosa |
+| `201` | Recurso creado exitosamente |
+| `400` | Datos de entrada inválidos |
+| `401` | No autenticado |
+| `403` | Sin permisos para ejecutar la acción |
+| `404` | Recurso no encontrado |
+| `422` | Violación de regla de negocio del dominio |
+| `500` | Error interno del servidor |
 
 ---
 
