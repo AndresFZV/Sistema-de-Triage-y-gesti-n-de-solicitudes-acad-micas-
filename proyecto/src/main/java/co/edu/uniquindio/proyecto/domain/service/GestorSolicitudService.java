@@ -6,6 +6,8 @@ import co.edu.uniquindio.proyecto.domain.exception.ReglaDominioException;
 import co.edu.uniquindio.proyecto.domain.valueobject.EstadoSolicitud;
 import co.edu.uniquindio.proyecto.domain.valueobject.Prioridad;
 import co.edu.uniquindio.proyecto.domain.valueobject.TipoSolicitud;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
 /**
  * Servicio de dominio que gestiona las reglas de roles sobre el ciclo de vida
@@ -24,6 +26,9 @@ import co.edu.uniquindio.proyecto.domain.valueobject.TipoSolicitud;
  *   <li>Solo el solicitante puede cancelar su propia solicitud.</li>
  * </ul>
  */
+
+@Service
+@RequiredArgsConstructor
 public class GestorSolicitudService {
 
     /**

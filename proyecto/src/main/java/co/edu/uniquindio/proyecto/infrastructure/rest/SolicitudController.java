@@ -5,8 +5,8 @@ import co.edu.uniquindio.proyecto.aplication.dto.response.EventoHistorialRespons
 import co.edu.uniquindio.proyecto.aplication.dto.response.SolicitudResponse;
 import co.edu.uniquindio.proyecto.aplication.usecase.*;
 import co.edu.uniquindio.proyecto.domain.entity.Solicitud;
+import co.edu.uniquindio.proyecto.domain.exception.SolicitudNoEncontradaException;
 import co.edu.uniquindio.proyecto.domain.repository.SolicitudRepository;
-import co.edu.uniquindio.proyecto.domain.valueobject.CodigoSolicitud;
 import co.edu.uniquindio.proyecto.domain.valueobject.EstadoSolicitud;
 import co.edu.uniquindio.proyecto.domain.valueobject.TipoSolicitud;
 import co.edu.uniquindio.proyecto.infrastructure.rest.mapper.SolicitudMapper;
@@ -82,7 +82,8 @@ public class SolicitudController {
     @ApiResponse(responseCode = "200", description = "Solicitud encontrada")
     @ApiResponse(responseCode = "404", description = "Solicitud no encontrada")
     public ResponseEntity<SolicitudResponse> obtener(@PathVariable String codigo) {
-        Solicitud solicitud = solicitudRepository.obtenerPorCodigo(new CodigoSolicitud(codigo));
+        Solicitud solicitud = solicitudRepository.findByCodigo(codigo)
+                .orElseThrow(() -> new SolicitudNoEncontradaException(codigo));
         return ResponseEntity.ok(mapper.toResponse(solicitud));
     }
 
@@ -98,13 +99,11 @@ public class SolicitudController {
             @PathVariable String codigo,
             @Valid @RequestBody ClasificarSolicitudRequest request) {
 
-        clasificarSolicitudUseCase.ejecutar(
+        Solicitud solicitud = clasificarSolicitudUseCase.ejecutar(
                 codigo,
                 TipoSolicitud.valueOf(request.tipoSolicitud()),
                 request.adminId()
         );
-
-        Solicitud solicitud = solicitudRepository.obtenerPorCodigo(new CodigoSolicitud(codigo));
         return ResponseEntity.ok(mapper.toResponse(solicitud));
     }
 
@@ -120,8 +119,7 @@ public class SolicitudController {
             @PathVariable String codigo,
             @Valid @RequestBody EnRevisionRequest request) {
 
-        enRevisionUseCase.ejecutar(codigo, request.responsableId());
-        Solicitud solicitud = solicitudRepository.obtenerPorCodigo(new CodigoSolicitud(codigo));
+        Solicitud solicitud = enRevisionUseCase.ejecutar(codigo, request.responsableId());
         return ResponseEntity.ok(mapper.toResponse(solicitud));
     }
 
@@ -137,8 +135,7 @@ public class SolicitudController {
             @PathVariable String codigo,
             @Valid @RequestBody AtenderRequest request) {
 
-        atenderSolicitudUseCase.ejecutar(codigo, request.adminId());
-        Solicitud solicitud = solicitudRepository.obtenerPorCodigo(new CodigoSolicitud(codigo));
+        Solicitud solicitud = atenderSolicitudUseCase.ejecutar(codigo, request.adminId());
         return ResponseEntity.ok(mapper.toResponse(solicitud));
     }
 
@@ -154,8 +151,7 @@ public class SolicitudController {
             @PathVariable String codigo,
             @Valid @RequestBody RechazarRequest request) {
 
-        rechazarSolicitudUseCase.ejecutar(codigo, request.adminId());
-        Solicitud solicitud = solicitudRepository.obtenerPorCodigo(new CodigoSolicitud(codigo));
+        Solicitud solicitud = rechazarSolicitudUseCase.ejecutar(codigo, request.adminId());
         return ResponseEntity.ok(mapper.toResponse(solicitud));
     }
 
@@ -171,8 +167,7 @@ public class SolicitudController {
             @PathVariable String codigo,
             @Valid @RequestBody CerrarRequest request) {
 
-        cerrarSolicitudUseCase.ejecutar(codigo, request.adminId());
-        Solicitud solicitud = solicitudRepository.obtenerPorCodigo(new CodigoSolicitud(codigo));
+        Solicitud solicitud = cerrarSolicitudUseCase.ejecutar(codigo, request.adminId());
         return ResponseEntity.ok(mapper.toResponse(solicitud));
     }
 
@@ -188,8 +183,7 @@ public class SolicitudController {
             @PathVariable String codigo,
             @Valid @RequestBody CancelarRequest request) {
 
-        cancelarSolicitudUseCase.ejecutar(codigo, request.solicitanteId());
-        Solicitud solicitud = solicitudRepository.obtenerPorCodigo(new CodigoSolicitud(codigo));
+        Solicitud solicitud = cancelarSolicitudUseCase.ejecutar(codigo, request.solicitanteId());
         return ResponseEntity.ok(mapper.toResponse(solicitud));
     }
 
@@ -200,7 +194,8 @@ public class SolicitudController {
     public ResponseEntity<List<EventoHistorialResponse>> historial(
             @PathVariable String codigo) {
 
-        Solicitud solicitud = solicitudRepository.obtenerPorCodigo(new CodigoSolicitud(codigo));
+        Solicitud solicitud = solicitudRepository.findByCodigo(codigo)
+                .orElseThrow(() -> new SolicitudNoEncontradaException(codigo));
         return ResponseEntity.ok(mapper.toEventoResponseList(solicitud.getHistorial()));
     }
 }

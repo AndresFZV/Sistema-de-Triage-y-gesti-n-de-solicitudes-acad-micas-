@@ -1,6 +1,8 @@
 package co.edu.uniquindio.proyecto.infrastructure.rest;
 
 import co.edu.uniquindio.proyecto.domain.exception.ReglaDominioException;
+import co.edu.uniquindio.proyecto.domain.exception.SolicitudNoEncontradaException;
+import co.edu.uniquindio.proyecto.domain.exception.UsuarioNoEncontradoException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -42,6 +44,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGeneral(Exception ex) {
+        ex.printStackTrace();
         return buildResponse(
                 HttpStatus.INTERNAL_SERVER_ERROR,
                 "Ocurrió un error inesperado. Por favor intente más tarde",
@@ -62,5 +65,17 @@ public class GlobalExceptionHandler {
             response.put("errores", errores);
 
         return ResponseEntity.status(status).body(response);
+    }
+
+    @ExceptionHandler(SolicitudNoEncontradaException.class)
+    public ResponseEntity<Map<String, Object>> handleSolicitudNoEncontrada(
+            SolicitudNoEncontradaException ex) {
+        return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage(), null);
+    }
+
+    @ExceptionHandler(UsuarioNoEncontradoException.class)
+    public ResponseEntity<Map<String, Object>> handleUsuarioNoEncontrado(
+            UsuarioNoEncontradoException ex) {
+        return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage(), null);
     }
 }

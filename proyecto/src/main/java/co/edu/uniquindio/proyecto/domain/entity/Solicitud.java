@@ -34,17 +34,20 @@ import java.util.Set;
 @Getter
 public class Solicitud {
 
+    /** Identificador técnico generado por la base de datos. */
+    private Long id;
+
     /** Código único generado automáticamente al momento del registro. */
-    private final CodigoSolicitud codigo;
+    private CodigoSolicitud codigo;
 
     /** Descripción del motivo de la solicitud. Inmutable. */
-    private final String descripcion;
+    private String descripcion;
 
     /** Usuario que registró la solicitud. Inmutable. */
-    private final Usuario solicitante;
+    private Usuario solicitante;
 
     /** Fecha y hora exacta en que fue registrada la solicitud. Inmutable. */
-    private final LocalDateTime fechaCreacion;
+    private LocalDateTime fechaCreacion;
 
     /** Tipo asignado durante la clasificación. */
     private TipoSolicitud tipoSolicitud;
@@ -62,7 +65,7 @@ public class Solicitud {
      * Historial cronológico de eventos. Usa {@code LinkedHashSet} para
      * garantizar orden de inserción y ausencia de duplicados.
      */
-    private final Set<EventoHistorial> historial;
+    private Set<EventoHistorial> historial;
 
     /**
      * Registra una nueva solicitud en el sistema.
@@ -217,5 +220,41 @@ public class Solicitud {
      */
     private void registrarEvento(EventoHistorial evento) {
         this.historial.add(evento);
+    }
+
+    /**
+     * Factory method para reconstruir una solicitud desde la base de datos.
+     * No ejecuta validaciones de creación porque los datos ya fueron validados
+     * al momento de persistirse.
+     */
+    public static Solicitud reconstruirDesdeDB(
+            Long id,
+            CodigoSolicitud codigo,
+            String descripcion,
+            Usuario solicitante,
+            Usuario responsable,
+            EstadoSolicitud estado,
+            TipoSolicitud tipoSolicitud,
+            Prioridad prioridad,
+            List<EventoHistorial> historial,
+            LocalDateTime fechaCreacion) {
+
+        Solicitud solicitud = new Solicitud();
+        solicitud.id = id;
+        solicitud.codigo = codigo;
+        solicitud.descripcion = descripcion;
+        solicitud.solicitante = solicitante;
+        solicitud.responsable = responsable;
+        solicitud.estado = estado;
+        solicitud.tipoSolicitud = tipoSolicitud;
+        solicitud.prioridad = prioridad;
+        solicitud.fechaCreacion = fechaCreacion;
+        solicitud.historial = new LinkedHashSet<>(historial);
+        return solicitud;
+    }
+
+    /** Constructor privado para uso exclusivo del factory method reconstruirDesdeDB. */
+    private Solicitud() {
+        this.historial = new LinkedHashSet<>();
     }
 }
