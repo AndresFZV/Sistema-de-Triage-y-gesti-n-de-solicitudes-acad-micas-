@@ -10,6 +10,10 @@ import co.edu.uniquindio.proyecto.infrastructure.persistence.jpa.entity.EstadoSo
 import co.edu.uniquindio.proyecto.infrastructure.persistence.jpa.entity.SolicitudEntity;
 import co.edu.uniquindio.proyecto.infrastructure.persistence.jpa.mapper.SolicitudPersistenceMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -60,6 +64,26 @@ public class SolicitudJpaRepository implements SolicitudRepository {
     @Transactional(readOnly = true)
     public List<Solicitud> findAll() {
         return dataRepository.findAll().stream()
+                .map(this::toDomainWithRelations)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Ejercicio 4 — Paginación:
+     * Devuelve una página de solicitudes con estado distinto a CANCELADA,
+     * ordenadas por fecha de creación descendente.
+     *
+     * @param pagina  Número de página (0-indexed)
+     * @param tamano  Cantidad de elementos por página
+     * @return Lista de solicitudes del dominio correspondiente a la página solicitada
+     */
+    @Transactional(readOnly = true)
+    public List<Solicitud> findActivasPaginadas(int pagina, int tamano) {
+        Pageable pageable = PageRequest.of(pagina, tamano, Sort.by("fechaCreacion").descending());
+        Page<SolicitudEntity> resultado = dataRepository.findByEstadoNot(
+                EstadoSolicitudEnum.CANCELADA, pageable
+        );
+        return resultado.getContent().stream()
                 .map(this::toDomainWithRelations)
                 .collect(Collectors.toList());
     }
