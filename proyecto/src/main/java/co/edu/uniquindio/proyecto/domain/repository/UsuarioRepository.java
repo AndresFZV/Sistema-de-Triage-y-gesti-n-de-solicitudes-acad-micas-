@@ -11,5 +11,11 @@ public interface UsuarioRepository {
 
     Optional<Usuario> findById(String id);
 
+    Optional<Usuario> findByEmail(String email);
+
     List<Usuario> findAll();
+
+    List<Usuario> findByNombreContaining(String nombre);
+
+    void deleteById(String id);
 }

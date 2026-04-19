@@ -82,4 +82,17 @@ public class Usuario {
     public boolean esDocente() {
         return this.tipoUsuario == TipoUsuario.DOCENTE;
     }
+
+    /**
+     * Crea una nueva instancia del usuario con los datos actualizados.
+     * Mantiene la inmutabilidad de la entidad.
+     *
+     * @param nuevoNombre      Nuevo nombre completo.
+     * @param nuevoEmail       Nuevo email validado.
+     * @param nuevoTipoUsuario Nuevo tipo de usuario.
+     * @return Nueva instancia de Usuario con los datos actualizados.
+     */
+    public Usuario actualizar(String nuevoNombre, Email nuevoEmail, TipoUsuario nuevoTipoUsuario) {
+        return new Usuario(this.id, nuevoNombre, nuevoEmail, nuevoTipoUsuario);
+    }
 }

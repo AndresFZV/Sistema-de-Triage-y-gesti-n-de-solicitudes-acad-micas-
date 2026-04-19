@@ -32,4 +32,6 @@ public interface SolicitudRepository {
     );
 
     Map<String, Long> reportePorEstado();
+
+    List<Solicitud> findBySolicitanteId(String solicitanteId);
 }

@@ -124,5 +124,14 @@ public class SolicitudJpaRepository implements SolicitudRepository {
         return reporte;
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public List<Solicitud> findBySolicitanteId(String solicitanteId) {
+        return dataRepository.findBySolicitanteCodigo(solicitanteId)
+                .stream()
+                .map(this::toDomainWithRelations)
+                .toList();
+    }
+
 
 }

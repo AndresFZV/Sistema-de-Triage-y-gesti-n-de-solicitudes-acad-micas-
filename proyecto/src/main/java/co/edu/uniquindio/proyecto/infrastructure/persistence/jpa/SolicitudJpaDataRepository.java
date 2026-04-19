@@ -69,4 +69,6 @@ interface SolicitudJpaDataRepository extends JpaRepository<SolicitudEntity, Long
             nativeQuery = true
     )
     List<Object[]> reporteAgrupacionPorEstado();
+
+    List<SolicitudEntity> findBySolicitanteCodigo(String solicitanteCodigo);
 }
