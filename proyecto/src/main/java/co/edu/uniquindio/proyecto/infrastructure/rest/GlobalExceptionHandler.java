@@ -2,7 +2,9 @@ package co.edu.uniquindio.proyecto.infrastructure.rest;
 
 import co.edu.uniquindio.proyecto.domain.exception.ReglaDominioException;
 import co.edu.uniquindio.proyecto.domain.exception.SolicitudNoEncontradaException;
+import co.edu.uniquindio.proyecto.domain.exception.UsuarioNoAutorizadoException;
 import co.edu.uniquindio.proyecto.domain.exception.UsuarioNoEncontradoException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -42,6 +44,16 @@ public class GlobalExceptionHandler {
         return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage(), null);
     }
 
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<Map<String, Object>> handleDataIntegrity(
+            DataIntegrityViolationException ex) {
+        String mensaje = "Ya existe un registro con esos datos";
+        if (ex.getMessage() != null && ex.getMessage().contains("EMAIL")) {
+            mensaje = "Ya existe un usuario con ese email";
+        }
+        return buildResponse(HttpStatus.CONFLICT, mensaje, null);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGeneral(Exception ex) {
         ex.printStackTrace();
@@ -77,5 +89,11 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, Object>> handleUsuarioNoEncontrado(
             UsuarioNoEncontradoException ex) {
         return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage(), null);
+    }
+
+    @ExceptionHandler(UsuarioNoAutorizadoException.class)
+    public ResponseEntity<Map<String, Object>> handleNoAutorizado(
+            UsuarioNoAutorizadoException ex) {
+        return buildResponse(HttpStatus.FORBIDDEN, ex.getMessage(), null);
     }
 }
