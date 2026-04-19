@@ -5,6 +5,7 @@ import co.edu.uniquindio.proyecto.domain.entity.Solicitud;
 import co.edu.uniquindio.proyecto.domain.entity.Usuario;
 import co.edu.uniquindio.proyecto.domain.repository.SolicitudRepository;
 import co.edu.uniquindio.proyecto.domain.valueobject.*;
+import co.edu.uniquindio.proyecto.infrastructure.rest.controllers.SolicitudController;
 import co.edu.uniquindio.proyecto.infrastructure.rest.mapper.SolicitudMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

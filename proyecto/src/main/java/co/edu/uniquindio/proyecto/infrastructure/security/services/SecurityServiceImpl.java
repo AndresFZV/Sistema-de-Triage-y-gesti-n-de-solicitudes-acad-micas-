@@ -1,8 +1,8 @@
 package co.edu.uniquindio.proyecto.infrastructure.security.services;
 
 import co.edu.uniquindio.proyecto.application.service.SecurityService;
-import co.edu.uniquindio.proyecto.infrastructure.rest.dto.LoginRequest;
-import co.edu.uniquindio.proyecto.infrastructure.rest.dto.TokenResponse;
+import co.edu.uniquindio.proyecto.infrastructure.rest.dto.request.LoginRequest;
+import co.edu.uniquindio.proyecto.infrastructure.rest.dto.response.TokenResponse;
 import co.edu.uniquindio.proyecto.infrastructure.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;

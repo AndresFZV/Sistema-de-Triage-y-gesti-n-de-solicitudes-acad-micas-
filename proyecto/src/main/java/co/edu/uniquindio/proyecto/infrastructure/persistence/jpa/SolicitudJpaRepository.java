@@ -6,8 +6,12 @@ import co.edu.uniquindio.proyecto.domain.exception.UsuarioNoEncontradoException;
 import co.edu.uniquindio.proyecto.domain.repository.SolicitudRepository;
 import co.edu.uniquindio.proyecto.domain.repository.UsuarioRepository;
 import co.edu.uniquindio.proyecto.domain.valueobject.EstadoSolicitud;
+import co.edu.uniquindio.proyecto.domain.valueobject.Prioridad;
+import co.edu.uniquindio.proyecto.domain.valueobject.TipoSolicitud;
 import co.edu.uniquindio.proyecto.infrastructure.persistence.jpa.entity.EstadoSolicitudEnum;
+import co.edu.uniquindio.proyecto.infrastructure.persistence.jpa.entity.PrioridadEnum;
 import co.edu.uniquindio.proyecto.infrastructure.persistence.jpa.entity.SolicitudEntity;
+import co.edu.uniquindio.proyecto.infrastructure.persistence.jpa.entity.TipoSolicitudEnum;
 import co.edu.uniquindio.proyecto.infrastructure.persistence.jpa.mapper.SolicitudPersistenceMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -17,7 +21,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -47,7 +53,7 @@ public class SolicitudJpaRepository implements SolicitudRepository {
     @Override
     @Transactional(readOnly = true)
     public Optional<Solicitud> findByCodigo(String codigo) {
-        return dataRepository.findByCodigo(codigo)
+        return dataRepository.buscarSolicitudConHistorial(codigo)
                 .map(this::toDomainWithRelations);
     }
 
@@ -68,25 +74,6 @@ public class SolicitudJpaRepository implements SolicitudRepository {
                 .collect(Collectors.toList());
     }
 
-    /**
-     * Ejercicio 4 — Paginación:
-     * Devuelve una página de solicitudes con estado distinto a CANCELADA,
-     * ordenadas por fecha de creación descendente.
-     *
-     * @param pagina  Número de página (0-indexed)
-     * @param tamano  Cantidad de elementos por página
-     * @return Lista de solicitudes del dominio correspondiente a la página solicitada
-     */
-    @Transactional(readOnly = true)
-    public List<Solicitud> findActivasPaginadas(int pagina, int tamano) {
-        Pageable pageable = PageRequest.of(pagina, tamano, Sort.by("fechaCreacion").descending());
-        Page<SolicitudEntity> resultado = dataRepository.findByEstadoNot(
-                EstadoSolicitudEnum.CANCELADA, pageable
-        );
-        return resultado.getContent().stream()
-                .map(this::toDomainWithRelations)
-                .collect(Collectors.toList());
-    }
 
     private Solicitud toDomainWithRelations(SolicitudEntity entity) {
         Usuario solicitante = usuarioRepository
@@ -101,5 +88,39 @@ public class SolicitudJpaRepository implements SolicitudRepository {
         }
 
         return mapper.toDomain(entity, solicitante, responsable);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<Solicitud> buscarConFiltros(
+            EstadoSolicitud estado,
+            TipoSolicitud tipo,
+            Prioridad prioridad,
+            String solicitanteId,
+            Pageable pageable) {
+
+        EstadoSolicitudEnum estadoEnum = estado != null
+                ? EstadoSolicitudEnum.valueOf(estado.name()) : null;
+        TipoSolicitudEnum tipoEnum = tipo != null
+                ? TipoSolicitudEnum.valueOf(tipo.name()) : null;
+        PrioridadEnum prioridadEnum = prioridad != null
+                ? PrioridadEnum.valueOf(prioridad.name()) : null;
+
+        return dataRepository
+                .buscarConFiltros(estadoEnum, tipoEnum, prioridadEnum, solicitanteId, pageable)
+                .map(this::toDomainWithRelations);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Map<String, Long> reportePorEstado() {
+        List<Object[]> resultado = dataRepository.reporteAgrupacionPorEstado();
+        Map<String, Long> reporte = new LinkedHashMap<>();
+        for (Object[] fila : resultado) {
+            String estado = fila[0].toString();
+            Long total = ((Number) fila[1]).longValue();
+            reporte.put(estado, total);
+        }
+        return reporte;
     }
 }

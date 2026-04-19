@@ -1,4 +1,4 @@
-package co.edu.uniquindio.proyecto.infrastructure.rest;
+package co.edu.uniquindio.proyecto.infrastructure.rest.controllers;
 
 import co.edu.uniquindio.proyecto.application.dto.request.*;
 import co.edu.uniquindio.proyecto.application.dto.response.EventoHistorialResponse;
@@ -8,19 +8,23 @@ import co.edu.uniquindio.proyecto.domain.entity.Solicitud;
 import co.edu.uniquindio.proyecto.domain.exception.SolicitudNoEncontradaException;
 import co.edu.uniquindio.proyecto.domain.repository.SolicitudRepository;
 import co.edu.uniquindio.proyecto.domain.valueobject.EstadoSolicitud;
+import co.edu.uniquindio.proyecto.domain.valueobject.Prioridad;
 import co.edu.uniquindio.proyecto.domain.valueobject.TipoSolicitud;
+import co.edu.uniquindio.proyecto.infrastructure.rest.dto.response.PaginaResponse;
 import co.edu.uniquindio.proyecto.infrastructure.rest.mapper.SolicitudMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/solicitudes")
@@ -67,14 +71,43 @@ public class SolicitudController {
     @GetMapping
     @Operation(
             summary = "Listar solicitudes",
-            description = "Lista solicitudes con filtro opcional por estado."
+            description = "Lista solicitudes con filtros opcionales y paginación."
     )
-    @ApiResponse(responseCode = "200", description = "Lista de solicitudes")
-    public ResponseEntity<List<SolicitudResponse>> listar(
-            @RequestParam(required = false) EstadoSolicitud estado) {
+    @ApiResponse(responseCode = "200", description = "Lista paginada de solicitudes")
+    public ResponseEntity<PaginaResponse<SolicitudResponse>> listar(
+            @RequestParam(required = false) EstadoSolicitud estado,
+            @RequestParam(required = false) TipoSolicitud tipo,
+            @RequestParam(required = false) Prioridad prioridad,
+            @RequestParam(required = false) String solicitanteId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "fechaCreacion") String sortBy) {
 
-        List<Solicitud> solicitudes = consultarPorEstadoUseCase.ejecutar(estado);
-        return ResponseEntity.ok(mapper.toResponseList(solicitudes));
+        Page<Solicitud> resultado = consultarPorEstadoUseCase.ejecutarPaginado(
+                estado, tipo, prioridad, solicitanteId, page, size, sortBy
+        );
+
+        PaginaResponse<SolicitudResponse> response = new PaginaResponse<>(
+                mapper.toResponseList(resultado.getContent()),
+                resultado.getNumber(),
+                resultado.getSize(),
+                resultado.getTotalElements(),
+                resultado.getTotalPages(),
+                resultado.isFirst(),
+                resultado.isLast()
+        );
+
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/reporte/por-estado")
+    @Operation(
+            summary = "Reporte de solicitudes por estado",
+            description = "Retorna la cantidad de solicitudes agrupadas por estado."
+    )
+    @ApiResponse(responseCode = "200", description = "Reporte generado")
+    public ResponseEntity<Map<String, Long>> reportePorEstado() {
+        return ResponseEntity.ok(consultarPorEstadoUseCase.reportePorEstado());
     }
 
     @GetMapping("/{codigo}")
@@ -85,6 +118,18 @@ public class SolicitudController {
         Solicitud solicitud = solicitudRepository.findByCodigo(codigo)
                 .orElseThrow(() -> new SolicitudNoEncontradaException(codigo));
         return ResponseEntity.ok(mapper.toResponse(solicitud));
+    }
+
+    @GetMapping("/{codigo}/historial")
+    @Operation(summary = "Obtener historial de una solicitud")
+    @ApiResponse(responseCode = "200", description = "Historial de eventos")
+    @ApiResponse(responseCode = "404", description = "Solicitud no encontrada")
+    public ResponseEntity<List<EventoHistorialResponse>> historial(
+            @PathVariable String codigo) {
+
+        Solicitud solicitud = solicitudRepository.findByCodigo(codigo)
+                .orElseThrow(() -> new SolicitudNoEncontradaException(codigo));
+        return ResponseEntity.ok(mapper.toEventoResponseList(solicitud.getHistorial()));
     }
 
     @PatchMapping("/{codigo}/clasificar")
@@ -185,17 +230,5 @@ public class SolicitudController {
 
         Solicitud solicitud = cancelarSolicitudUseCase.ejecutar(codigo, request.solicitanteId());
         return ResponseEntity.ok(mapper.toResponse(solicitud));
-    }
-
-    @GetMapping("/{codigo}/historial")
-    @Operation(summary = "Obtener historial de una solicitud")
-    @ApiResponse(responseCode = "200", description = "Historial de eventos")
-    @ApiResponse(responseCode = "404", description = "Solicitud no encontrada")
-    public ResponseEntity<List<EventoHistorialResponse>> historial(
-            @PathVariable String codigo) {
-
-        Solicitud solicitud = solicitudRepository.findByCodigo(codigo)
-                .orElseThrow(() -> new SolicitudNoEncontradaException(codigo));
-        return ResponseEntity.ok(mapper.toEventoResponseList(solicitud.getHistorial()));
     }
 }

@@ -1,4 +1,4 @@
-package co.edu.uniquindio.proyecto.infrastructure.rest.dto;
+package co.edu.uniquindio.proyecto.infrastructure.rest.dto.response;
 
 import java.time.Instant;
 import java.util.Collection;

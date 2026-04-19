@@ -1,49 +1,72 @@
 package co.edu.uniquindio.proyecto.infrastructure.persistence.jpa;
 
-import co.edu.uniquindio.proyecto.infrastructure.persistence.jpa.entity.*;
+import co.edu.uniquindio.proyecto.infrastructure.persistence.jpa.entity.EstadoSolicitudEnum;
+import co.edu.uniquindio.proyecto.infrastructure.persistence.jpa.entity.PrioridadEnum;
+import co.edu.uniquindio.proyecto.infrastructure.persistence.jpa.entity.SolicitudEntity;
+import co.edu.uniquindio.proyecto.infrastructure.persistence.jpa.entity.TipoSolicitudEnum;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.*;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
 
-public interface SolicitudJpaDataRepository extends JpaRepository<SolicitudEntity, Long> {
+interface SolicitudJpaDataRepository extends JpaRepository<SolicitudEntity, Long> {
 
-    // ── Inferencia básica ──────────────────────────────────────────────────
+    // ---- Inferencia de métodos ----
 
     Optional<SolicitudEntity> findByCodigo(String codigo);
 
     List<SolicitudEntity> findByEstado(EstadoSolicitudEnum estado);
 
-    // Ejercicio 1 — Inferencia: tipo ordenado por prioridad desc y fecha desc
-    // Prioridad es un enum simple (no embebido), por eso no se usa _nivel
-    List<SolicitudEntity> findByTipoSolicitudOrderByPrioridadDescFechaCreacionDesc(TipoSolicitudEnum tipo);
+    Page<SolicitudEntity> findByEstado(EstadoSolicitudEnum estado, Pageable pageable);
 
-    // ── JPQL ───────────────────────────────────────────────────────────────
+    Page<SolicitudEntity> findByTipoSolicitud(TipoSolicitudEnum tipo, Pageable pageable);
 
-    // Ejercicio 2 — JPQL equivalente al método de inferencia anterior
-    @Query("""
-        SELECT s FROM SolicitudEntity s
-        WHERE s.tipoSolicitud = :tipo
-        ORDER BY s.prioridad DESC, s.fechaCreacion DESC
-    """)
-    List<SolicitudEntity> buscarPorTipoOrdenado(@Param("tipo") TipoSolicitudEnum tipo);
+    Page<SolicitudEntity> findByPrioridad(PrioridadEnum prioridad, Pageable pageable);
 
-    // Ejercicio 3 — JPQL: filtro opcional por código o solicitante
-    // Si se pasa código tiene prioridad; si es null, filtra por solicitanteCodigo
-    @Query("""
-        SELECT s FROM SolicitudEntity s
-        WHERE (:codigo IS NULL OR s.codigo = :codigo)
-        AND (:solicitanteCodigo IS NULL OR s.solicitanteCodigo = :solicitanteCodigo)
-    """)
-    List<SolicitudEntity> buscarPorCodigoOSolicitante(
-            @Param("codigo") String codigo,
-            @Param("solicitanteCodigo") String solicitanteCodigo
+    Page<SolicitudEntity> findByEstadoAndTipoSolicitud(
+            EstadoSolicitudEnum estado,
+            TipoSolicitudEnum tipo,
+            Pageable pageable
     );
 
-    // Ejercicio 4 — Paginación: solicitudes con estado distinto al indicado
-    Page<SolicitudEntity> findByEstadoNot(EstadoSolicitudEnum estado, Pageable pageable);
+    List<SolicitudEntity> findByDescripcionContainingIgnoreCase(String keyword);
 
+    boolean existsByCodigo(String codigo);
+
+    long countByEstado(EstadoSolicitudEnum estado);
+
+    // ---- JPQL ----
+
+    @Query("SELECT s FROM SolicitudEntity s WHERE s.estado IN (:estados)")
+    List<SolicitudEntity> buscarPorVariosEstados(
+            @Param("estados") List<EstadoSolicitudEnum> estados
+    );
+
+    @Query("""
+            SELECT s FROM SolicitudEntity s
+            WHERE (:estado IS NULL OR s.estado = :estado)
+            AND (:tipo IS NULL OR s.tipoSolicitud = :tipo)
+            AND (:prioridad IS NULL OR s.prioridad = :prioridad)
+            AND (:solicitanteId IS NULL OR s.solicitanteCodigo = :solicitanteId)
+            """)
+    Page<SolicitudEntity> buscarConFiltros(
+            @Param("estado") EstadoSolicitudEnum estado,
+            @Param("tipo") TipoSolicitudEnum tipo,
+            @Param("prioridad") PrioridadEnum prioridad,
+            @Param("solicitanteId") String solicitanteId,
+            Pageable pageable
+    );
+
+    @Query("SELECT s FROM SolicitudEntity s LEFT JOIN FETCH s.historial WHERE s.codigo = :codigo")
+    Optional<SolicitudEntity> buscarSolicitudConHistorial(@Param("codigo") String codigo);
+
+    @Query(
+            value = "SELECT estado, COUNT(*) as total FROM solicitudes GROUP BY estado",
+            nativeQuery = true
+    )
+    List<Object[]> reporteAgrupacionPorEstado();
 }
