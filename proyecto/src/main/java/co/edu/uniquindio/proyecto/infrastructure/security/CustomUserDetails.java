@@ -8,15 +8,14 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.List;
 
-/**
- * Adaptador entre UsuarioEntity y el contrato UserDetails de Spring Security.
- * Spring Security no conoce UsuarioEntity directamente — solo trabaja con UserDetails.
- */
 public record CustomUserDetails(UsuarioEntity user) implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority(user.getRolSeguridad().name()));
+        return List.of(
+                new SimpleGrantedAuthority(user.getRolSeguridad().name()),
+                new SimpleGrantedAuthority(user.getTipoUsuario().name())
+        );
     }
 
     @Override
