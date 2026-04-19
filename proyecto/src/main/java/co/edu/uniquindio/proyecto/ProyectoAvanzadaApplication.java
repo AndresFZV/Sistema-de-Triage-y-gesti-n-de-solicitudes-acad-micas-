@@ -2,12 +2,13 @@ package co.edu.uniquindio.proyecto;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 
 @SpringBootApplication
+@ConfigurationPropertiesScan
 public class ProyectoAvanzadaApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(ProyectoAvanzadaApplication.class, args);
 	}
-
 }

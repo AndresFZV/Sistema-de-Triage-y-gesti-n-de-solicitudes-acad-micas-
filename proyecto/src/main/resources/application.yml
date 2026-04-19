@@ -34,3 +34,12 @@ springdoc:
     enabled: true
     tags-sorter: alpha
     operations-sorter: method
+
+default-users:
+  users:
+    - username: admin@uniquindio.edu.co
+      password: admin123
+      role: ADMIN
+    - username: estudiante@uniquindio.edu.co
+      password: estudiante123
+      role: USER
