@@ -9,7 +9,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 import java.util.Optional;
 
-interface SolicitudJpaDataRepository extends JpaRepository<SolicitudEntity, Long> {
+public interface SolicitudJpaDataRepository extends JpaRepository<SolicitudEntity, Long> {
 
     // ── Inferencia básica ──────────────────────────────────────────────────
 
