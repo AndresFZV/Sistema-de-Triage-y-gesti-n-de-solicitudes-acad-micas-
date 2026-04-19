@@ -1,4 +1,4 @@
-package co.edu.uniquindio.proyecto.aplication.usecase;
+package co.edu.uniquindio.proyecto.application.usecase;
 
 import co.edu.uniquindio.proyecto.domain.entity.Solicitud;
 import co.edu.uniquindio.proyecto.domain.entity.Usuario;
@@ -13,21 +13,21 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-public class CancelarSolicitudUseCase {
+public class EnRevisionUseCase {
 
     private final SolicitudRepository solicitudRepository;
     private final UsuarioRepository usuarioRepository;
     private final GestorSolicitudService gestor;
 
     @Transactional
-    public Solicitud ejecutar(String codigo, String solicitanteId) {
+    public Solicitud ejecutar(String codigo, String responsableId) {
         Solicitud solicitud = solicitudRepository.findByCodigo(codigo)
                 .orElseThrow(() -> new SolicitudNoEncontradaException(codigo));
 
-        Usuario solicitante = usuarioRepository.findById(solicitanteId)
-                .orElseThrow(() -> new UsuarioNoEncontradoException(solicitanteId));
+        Usuario responsable = usuarioRepository.findById(responsableId)
+                .orElseThrow(() -> new UsuarioNoEncontradoException(responsableId));
 
-        gestor.cancelar(solicitud, solicitante);
+        gestor.enRevision(solicitud, responsable);
         return solicitudRepository.save(solicitud);
     }
 }

@@ -1,9 +1,9 @@
 package co.edu.uniquindio.proyecto.infrastructure.rest;
 
-import co.edu.uniquindio.proyecto.aplication.dto.request.*;
-import co.edu.uniquindio.proyecto.aplication.dto.response.EventoHistorialResponse;
-import co.edu.uniquindio.proyecto.aplication.dto.response.SolicitudResponse;
-import co.edu.uniquindio.proyecto.aplication.usecase.*;
+import co.edu.uniquindio.proyecto.application.dto.request.*;
+import co.edu.uniquindio.proyecto.application.dto.response.EventoHistorialResponse;
+import co.edu.uniquindio.proyecto.application.dto.response.SolicitudResponse;
+import co.edu.uniquindio.proyecto.application.usecase.*;
 import co.edu.uniquindio.proyecto.domain.entity.Solicitud;
 import co.edu.uniquindio.proyecto.domain.exception.SolicitudNoEncontradaException;
 import co.edu.uniquindio.proyecto.domain.repository.SolicitudRepository;

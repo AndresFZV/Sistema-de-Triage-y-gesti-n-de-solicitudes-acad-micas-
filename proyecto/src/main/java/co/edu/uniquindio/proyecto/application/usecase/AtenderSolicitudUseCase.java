@@ -1,4 +1,4 @@
-package co.edu.uniquindio.proyecto.aplication.usecase;
+package co.edu.uniquindio.proyecto.application.usecase;
 
 import co.edu.uniquindio.proyecto.domain.entity.Solicitud;
 import co.edu.uniquindio.proyecto.domain.entity.Usuario;
@@ -13,7 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-public class RechazarSolicitudUseCase {
+public class AtenderSolicitudUseCase {
 
     private final SolicitudRepository solicitudRepository;
     private final UsuarioRepository usuarioRepository;
@@ -27,7 +27,7 @@ public class RechazarSolicitudUseCase {
         Usuario admin = usuarioRepository.findById(adminId)
                 .orElseThrow(() -> new UsuarioNoEncontradoException(adminId));
 
-        gestor.rechazar(solicitud, admin);
+        gestor.atendida(solicitud, admin);
         return solicitudRepository.save(solicitud);
     }
 }

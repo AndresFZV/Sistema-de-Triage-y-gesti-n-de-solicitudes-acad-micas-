@@ -1,6 +1,6 @@
 package co.edu.uniquindio.proyecto.infrastructure.rest;
 
-import co.edu.uniquindio.proyecto.aplication.usecase.*;
+import co.edu.uniquindio.proyecto.application.usecase.*;
 import co.edu.uniquindio.proyecto.domain.entity.Solicitud;
 import co.edu.uniquindio.proyecto.domain.entity.Usuario;
 import co.edu.uniquindio.proyecto.domain.repository.SolicitudRepository;
@@ -73,7 +73,7 @@ class SolicitudControllerTest {
         when(crearSolicitudUseCase.ejecutar(anyString(), anyString()))
                 .thenReturn(solicitudMock);
         when(mapper.toResponse(any())).thenReturn(
-                new co.edu.uniquindio.proyecto.aplication.dto.response.SolicitudResponse(
+                new co.edu.uniquindio.proyecto.application.dto.response.SolicitudResponse(
                         solicitudMock.getCodigo().valor(),
                         solicitudMock.getDescripcion(),
                         solicitudMock.getEstado().name(),
@@ -143,7 +143,7 @@ class SolicitudControllerTest {
     void debeClasificarSolicitudYRetornar200() throws Exception {
         when(solicitudRepository.obtenerPorCodigo(any())).thenReturn(solicitudMock);
         when(mapper.toResponse(any())).thenReturn(
-                new co.edu.uniquindio.proyecto.aplication.dto.response.SolicitudResponse(
+                new co.edu.uniquindio.proyecto.application.dto.response.SolicitudResponse(
                         solicitudMock.getCodigo().valor(),
                         solicitudMock.getDescripcion(),
                         "PENDIENTE",
@@ -185,7 +185,7 @@ class SolicitudControllerTest {
     void debeRetornarHistorialDeSolicitud() throws Exception {
         when(solicitudRepository.obtenerPorCodigo(any())).thenReturn(solicitudMock);
         when(mapper.toEventoResponseList(any())).thenReturn(java.util.List.of(
-                new co.edu.uniquindio.proyecto.aplication.dto.response.EventoHistorialResponse(
+                new co.edu.uniquindio.proyecto.application.dto.response.EventoHistorialResponse(
                         "Solicitud registrada",
                         "CLASIFICACION",
                         "Juan Pérez",

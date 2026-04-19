@@ -1,4 +1,4 @@
-package co.edu.uniquindio.proyecto.aplication.dto.response;
+package co.edu.uniquindio.proyecto.application.dto.response;
 
 public record UsuarioResponse(
         String id,

@@ -27,7 +27,16 @@ public class UsuarioEntity {
     @Column(name = "email", nullable = false, unique = true, length = 150)
     private String email;
 
+    /** Contraseña encriptada con BCrypt. Nunca se almacena en texto plano. */
+    @Column(name = "password", nullable = false, length = 255)
+    private String password;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "tipo_usuario", nullable = false, length = 20)
     private TipoUsuarioEnum tipoUsuario;
+
+    /** Rol de seguridad usado por Spring Security. */
+    @Enumerated(EnumType.STRING)
+    @Column(name = "rol_seguridad", nullable = false, length = 10)
+    private RolSeguridadEnum rolSeguridad;
 }

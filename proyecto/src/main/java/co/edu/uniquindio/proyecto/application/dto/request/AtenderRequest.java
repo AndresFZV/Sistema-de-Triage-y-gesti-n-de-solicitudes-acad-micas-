@@ -1,4 +1,4 @@
-package co.edu.uniquindio.proyecto.aplication.dto.request;
+package co.edu.uniquindio.proyecto.application.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 
