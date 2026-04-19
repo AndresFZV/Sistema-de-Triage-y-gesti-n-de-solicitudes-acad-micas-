@@ -123,4 +123,6 @@ public class SolicitudJpaRepository implements SolicitudRepository {
         }
         return reporte;
     }
+
+
 }

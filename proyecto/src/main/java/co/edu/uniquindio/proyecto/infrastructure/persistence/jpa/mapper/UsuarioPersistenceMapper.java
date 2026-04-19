@@ -13,11 +13,13 @@ public interface UsuarioPersistenceMapper {
 
     // ---- Domain → Entity ----
 
-    @Mapping(target = "id", source = "id")
+    @Mapping(target = "id", ignore = true)
     @Mapping(target = "codigoExterno", source = "id")
     @Mapping(target = "nombre", source = "nombre")
     @Mapping(target = "email", expression = "java(usuario.getEmail().valor())")
     @Mapping(target = "tipoUsuario", expression = "java(toTipoUsuarioEnum(usuario.getTipoUsuario()))")
+    @Mapping(target = "password", ignore = true)
+    @Mapping(target = "rolSeguridad", ignore = true)
     UsuarioEntity toEntity(Usuario usuario);
 
     // ---- Entity → Domain ----
