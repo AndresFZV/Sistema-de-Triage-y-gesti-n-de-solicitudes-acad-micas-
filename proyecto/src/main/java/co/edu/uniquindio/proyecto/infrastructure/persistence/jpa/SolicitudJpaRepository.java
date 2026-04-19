@@ -133,5 +133,65 @@ public class SolicitudJpaRepository implements SolicitudRepository {
                 .toList();
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public List<Solicitud> findPendientesSinResponsable() {
+        return dataRepository
+                .findByResponsableCodigoIsNullAndEstado(EstadoSolicitudEnum.PENDIENTE)
+                .stream()
+                .map(this::toDomainWithRelations)
+                .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Solicitud> findByResponsableId(String responsableId) {
+        return dataRepository.findByResponsableCodigo(responsableId)
+                .stream()
+                .map(this::toDomainWithRelations)
+                .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Solicitud> findVencidas(int diasLimite) {
+        java.time.LocalDateTime fechaLimite = java.time.LocalDateTime.now()
+                .minusDays(diasLimite);
+        List<EstadoSolicitudEnum> estados = List.of(
+                EstadoSolicitudEnum.PENDIENTE,
+                EstadoSolicitudEnum.EN_PROCESO
+        );
+        return dataRepository.findVencidas(estados, fechaLimite)
+                .stream()
+                .map(this::toDomainWithRelations)
+                .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Map<String, Long> reportePorTipo() {
+        List<Object[]> resultado = dataRepository.reporteAgrupacionPorTipo();
+        Map<String, Long> reporte = new LinkedHashMap<>();
+        for (Object[] fila : resultado) {
+            String tipo = fila[0] != null ? fila[0].toString() : "SIN_TIPO";
+            Long total = ((Number) fila[1]).longValue();
+            reporte.put(tipo, total);
+        }
+        return reporte;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Map<String, Long> reportePorResponsable() {
+        List<Object[]> resultado = dataRepository.reporteAgrupacionPorResponsable();
+        Map<String, Long> reporte = new LinkedHashMap<>();
+        for (Object[] fila : resultado) {
+            String responsable = fila[0].toString();
+            Long total = ((Number) fila[1]).longValue();
+            reporte.put(responsable, total);
+        }
+        return reporte;
+    }
+
 
 }

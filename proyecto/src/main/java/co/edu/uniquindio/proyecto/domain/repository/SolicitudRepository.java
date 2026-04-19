@@ -33,5 +33,15 @@ public interface SolicitudRepository {
 
     Map<String, Long> reportePorEstado();
 
+    Map<String, Long> reportePorTipo();
+
+    Map<String, Long> reportePorResponsable();
+
     List<Solicitud> findBySolicitanteId(String solicitanteId);
+
+    List<Solicitud> findByResponsableId(String responsableId);
+
+    List<Solicitud> findPendientesSinResponsable();
+
+    List<Solicitud> findVencidas(int diasLimite);
 }

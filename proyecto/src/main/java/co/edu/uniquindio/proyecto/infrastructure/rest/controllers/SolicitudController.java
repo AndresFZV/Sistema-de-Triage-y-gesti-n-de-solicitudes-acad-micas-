@@ -1,6 +1,7 @@
 package co.edu.uniquindio.proyecto.infrastructure.rest.controllers;
 
 import co.edu.uniquindio.proyecto.application.dto.request.*;
+import co.edu.uniquindio.proyecto.application.dto.response.DashboardResponse;
 import co.edu.uniquindio.proyecto.application.dto.response.EventoHistorialResponse;
 import co.edu.uniquindio.proyecto.application.dto.response.SolicitudResponse;
 import co.edu.uniquindio.proyecto.application.usecase.*;
@@ -230,5 +231,76 @@ public class SolicitudController {
 
         Solicitud solicitud = cancelarSolicitudUseCase.ejecutar(codigo, request.solicitanteId());
         return ResponseEntity.ok(mapper.toResponse(solicitud));
+    }
+
+    @GetMapping("/mis-solicitudes")
+    @Operation(summary = "Mis solicitudes", description = "Solicitudes del solicitante autenticado")
+    @ApiResponse(responseCode = "200", description = "Lista de solicitudes")
+    public ResponseEntity<List<SolicitudResponse>> misSolicitudes(
+            @RequestParam String solicitanteId) {
+        List<SolicitudResponse> response = solicitudRepository.findBySolicitanteId(solicitanteId)
+                .stream()
+                .map(mapper::toResponse)
+                .toList();
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/asignadas-a-mi")
+    @Operation(summary = "Solicitudes asignadas", description = "Solicitudes donde soy responsable")
+    @ApiResponse(responseCode = "200", description = "Lista de solicitudes")
+    public ResponseEntity<List<SolicitudResponse>> asignadasAMi(
+            @RequestParam String responsableId) {
+        List<SolicitudResponse> response = consultarPorEstadoUseCase
+                .ejecutarAsignadasA(responsableId)
+                .stream()
+                .map(mapper::toResponse)
+                .toList();
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/pendientes")
+    @Operation(summary = "Solicitudes pendientes sin responsable")
+    @ApiResponse(responseCode = "200", description = "Lista de solicitudes")
+    public ResponseEntity<List<SolicitudResponse>> pendientesSinResponsable() {
+        List<SolicitudResponse> response = consultarPorEstadoUseCase
+                .ejecutarPendientesSinResponsable()
+                .stream()
+                .map(mapper::toResponse)
+                .toList();
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/vencidas")
+    @Operation(summary = "Solicitudes vencidas", description = "Solicitudes sin resolver después de N días")
+    @ApiResponse(responseCode = "200", description = "Lista de solicitudes")
+    public ResponseEntity<List<SolicitudResponse>> vencidas(
+            @RequestParam(defaultValue = "7") int dias) {
+        List<SolicitudResponse> response = consultarPorEstadoUseCase
+                .ejecutarVencidas(dias)
+                .stream()
+                .map(mapper::toResponse)
+                .toList();
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/reporte/por-tipo")
+    @Operation(summary = "Reporte de solicitudes por tipo")
+    @ApiResponse(responseCode = "200", description = "Reporte generado")
+    public ResponseEntity<Map<String, Long>> reportePorTipo() {
+        return ResponseEntity.ok(consultarPorEstadoUseCase.reportePorTipo());
+    }
+
+    @GetMapping("/reporte/por-responsable")
+    @Operation(summary = "Reporte de solicitudes por responsable")
+    @ApiResponse(responseCode = "200", description = "Reporte generado")
+    public ResponseEntity<Map<String, Long>> reportePorResponsable() {
+        return ResponseEntity.ok(consultarPorEstadoUseCase.reportePorResponsable());
+    }
+
+    @GetMapping("/dashboard")
+    @Operation(summary = "Dashboard general del sistema")
+    @ApiResponse(responseCode = "200", description = "Resumen del sistema")
+    public ResponseEntity<DashboardResponse> dashboard() {
+        return ResponseEntity.ok(consultarPorEstadoUseCase.dashboard());
     }
 }

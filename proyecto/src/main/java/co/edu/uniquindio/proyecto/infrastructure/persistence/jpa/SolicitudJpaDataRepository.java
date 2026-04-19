@@ -71,4 +71,29 @@ interface SolicitudJpaDataRepository extends JpaRepository<SolicitudEntity, Long
     List<Object[]> reporteAgrupacionPorEstado();
 
     List<SolicitudEntity> findBySolicitanteCodigo(String solicitanteCodigo);
+
+    // Solicitudes sin responsable asignado en estado PENDIENTE
+    List<SolicitudEntity> findByResponsableCodigoIsNullAndEstado(EstadoSolicitudEnum estado);
+
+    // Solicitudes por responsable
+    List<SolicitudEntity> findByResponsableCodigo(String responsableCodigo);
+
+    // Reporte por tipo
+    @Query(value = "SELECT tipo_solicitud, COUNT(*) as total FROM solicitudes GROUP BY tipo_solicitud", nativeQuery = true)
+    List<Object[]> reporteAgrupacionPorTipo();
+
+    // Reporte por responsable
+    @Query(value = "SELECT responsable_codigo, COUNT(*) as total FROM solicitudes WHERE responsable_codigo IS NOT NULL GROUP BY responsable_codigo", nativeQuery = true)
+    List<Object[]> reporteAgrupacionPorResponsable();
+
+    // Solicitudes vencidas - más de N días en estado PENDIENTE o EN_PROCESO
+    @Query("""
+        SELECT s FROM SolicitudEntity s
+        WHERE s.estado IN (:estados)
+        AND s.fechaCreacion <= :fechaLimite
+        """)
+    List<SolicitudEntity> findVencidas(
+            @Param("estados") List<EstadoSolicitudEnum> estados,
+            @Param("fechaLimite") java.time.LocalDateTime fechaLimite
+    );
 }

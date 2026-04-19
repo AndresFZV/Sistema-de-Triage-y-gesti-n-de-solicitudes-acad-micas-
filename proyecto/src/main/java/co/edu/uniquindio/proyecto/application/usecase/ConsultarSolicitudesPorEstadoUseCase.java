@@ -1,5 +1,6 @@
 package co.edu.uniquindio.proyecto.application.usecase;
 
+import co.edu.uniquindio.proyecto.application.dto.response.DashboardResponse;
 import co.edu.uniquindio.proyecto.domain.entity.Solicitud;
 import co.edu.uniquindio.proyecto.domain.repository.SolicitudRepository;
 import co.edu.uniquindio.proyecto.domain.valueobject.EstadoSolicitud;
@@ -53,5 +54,48 @@ public class ConsultarSolicitudesPorEstadoUseCase {
     @Transactional(readOnly = true)
     public Map<String, Long> reportePorEstado() {
         return solicitudRepository.reportePorEstado();
+    }
+
+    @Transactional(readOnly = true)
+    public List<Solicitud> ejecutarPendientesSinResponsable() {
+        return solicitudRepository.findPendientesSinResponsable();
+    }
+
+    @Transactional(readOnly = true)
+    public List<Solicitud> ejecutarAsignadasA(String responsableId) {
+        return solicitudRepository.findByResponsableId(responsableId);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Solicitud> ejecutarVencidas(int diasLimite) {
+        return solicitudRepository.findVencidas(diasLimite);
+    }
+
+    @Transactional(readOnly = true)
+    public Map<String, Long> reportePorTipo() {
+        return solicitudRepository.reportePorTipo();
+    }
+
+    @Transactional(readOnly = true)
+    public Map<String, Long> reportePorResponsable() {
+        return solicitudRepository.reportePorResponsable();
+    }
+
+    @Transactional(readOnly = true)
+    public DashboardResponse dashboard() {
+        Map<String, Long> porEstado = solicitudRepository.reportePorEstado();
+        Map<String, Long> porTipo = solicitudRepository.reportePorTipo();
+
+        return new DashboardResponse(
+                porEstado.values().stream().mapToLong(Long::longValue).sum(),
+                porEstado.getOrDefault("PENDIENTE", 0L),
+                porEstado.getOrDefault("EN_PROCESO", 0L),
+                porEstado.getOrDefault("ATENDIDA", 0L),
+                porEstado.getOrDefault("RECHAZADA", 0L),
+                porEstado.getOrDefault("CERRADA", 0L),
+                porEstado.getOrDefault("CANCELADA", 0L),
+                solicitudRepository.findPendientesSinResponsable().size(),
+                porTipo
+        );
     }
 }
