@@ -45,4 +45,5 @@ public interface SolicitudJpaDataRepository extends JpaRepository<SolicitudEntit
 
     // Ejercicio 4 — Paginación: solicitudes con estado distinto al indicado
     Page<SolicitudEntity> findByEstadoNot(EstadoSolicitudEnum estado, Pageable pageable);
+
 }
