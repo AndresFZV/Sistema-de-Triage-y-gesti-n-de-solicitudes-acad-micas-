@@ -7,6 +7,7 @@ import co.edu.uniquindio.proyecto.domain.exception.UsuarioNoEncontradoException;
 import co.edu.uniquindio.proyecto.domain.repository.SolicitudRepository;
 import co.edu.uniquindio.proyecto.domain.repository.UsuarioRepository;
 import co.edu.uniquindio.proyecto.domain.service.GestorSolicitudService;
+import co.edu.uniquindio.proyecto.domain.service.NotificacionService;
 import co.edu.uniquindio.proyecto.domain.valueobject.TipoSolicitud;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,7 @@ public class ClasificarSolicitudUseCase {
     private final SolicitudRepository solicitudRepository;
     private final UsuarioRepository usuarioRepository;
     private final GestorSolicitudService gestor;
+    private final NotificacionService notificacionService;
 
     @Transactional
     public Solicitud ejecutar(String codigo, TipoSolicitud tipo, String adminId) {
@@ -29,6 +31,8 @@ public class ClasificarSolicitudUseCase {
                 .orElseThrow(() -> new UsuarioNoEncontradoException(adminId));
 
         gestor.clasificar(solicitud, tipo, admin);
-        return solicitudRepository.save(solicitud);
+        Solicitud guardada = solicitudRepository.save(solicitud);
+        notificacionService.notificarSolicitudClasificada(guardada, solicitud.getSolicitante());
+        return guardada;
     }
 }

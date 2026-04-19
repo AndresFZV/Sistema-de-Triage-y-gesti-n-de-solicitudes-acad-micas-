@@ -7,6 +7,7 @@ import co.edu.uniquindio.proyecto.domain.exception.UsuarioNoEncontradoException;
 import co.edu.uniquindio.proyecto.domain.repository.SolicitudRepository;
 import co.edu.uniquindio.proyecto.domain.repository.UsuarioRepository;
 import co.edu.uniquindio.proyecto.domain.service.GestorSolicitudService;
+import co.edu.uniquindio.proyecto.domain.service.NotificacionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +19,7 @@ public class EnRevisionUseCase {
     private final SolicitudRepository solicitudRepository;
     private final UsuarioRepository usuarioRepository;
     private final GestorSolicitudService gestor;
+    private final NotificacionService notificacionService;
 
     @Transactional
     public Solicitud ejecutar(String codigo, String responsableId) {
@@ -28,6 +30,8 @@ public class EnRevisionUseCase {
                 .orElseThrow(() -> new UsuarioNoEncontradoException(responsableId));
 
         gestor.enRevision(solicitud, responsable);
-        return solicitudRepository.save(solicitud);
+        Solicitud guardada = solicitudRepository.save(solicitud);
+        notificacionService.notificarResponsableAsignado(guardada, responsable);
+        return guardada;
     }
 }
