@@ -7,7 +7,7 @@ import java.util.Optional;
 
 public interface UsuarioRepository {
 
-    Usuario save(Usuario usuario);
+    Usuario save(Usuario usuario, String passwordEncriptado);
 
     Optional<Usuario> findById(String id);
 

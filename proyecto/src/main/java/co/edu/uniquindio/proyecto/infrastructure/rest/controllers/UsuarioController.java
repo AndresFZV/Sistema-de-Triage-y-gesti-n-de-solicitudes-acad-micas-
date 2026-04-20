@@ -60,7 +60,8 @@ public class UsuarioController {
         Usuario usuario = crearUsuarioUseCase.ejecutar(
                 request.nombre(),
                 request.email(),
-                TipoUsuario.valueOf(request.tipoUsuario())
+                TipoUsuario.valueOf(request.tipoUsuario()),
+                request.password()
         );
 
         URI location = ServletUriComponentsBuilder

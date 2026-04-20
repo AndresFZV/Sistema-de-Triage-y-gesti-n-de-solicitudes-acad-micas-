@@ -1,4 +1,4 @@
-package co.edu.uniquindio.proyecto.infrastructure.rest;
+package co.edu.uniquindio.proyecto.infrastructure.rest.exception;
 
 import co.edu.uniquindio.proyecto.domain.exception.ReglaDominioException;
 import co.edu.uniquindio.proyecto.domain.exception.SolicitudNoEncontradaException;

@@ -3,6 +3,7 @@ package co.edu.uniquindio.proyecto.application.dto.request;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 /**
  * DTO de entrada para registrar un nuevo usuario en el sistema.
@@ -24,5 +25,9 @@ public record CrearUsuarioRequest(
         String email,
 
         @NotNull(message = "El tipo de usuario es obligatorio")
-        String tipoUsuario
+        String tipoUsuario,
+
+        @NotBlank(message = "La contraseña es obligatoria")
+        @Size(min = 8, message = "La contraseña debe tener al menos 8 caracteres")
+        String password
 ) {}

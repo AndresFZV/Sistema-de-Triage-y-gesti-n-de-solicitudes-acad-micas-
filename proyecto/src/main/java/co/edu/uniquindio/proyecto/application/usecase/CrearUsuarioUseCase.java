@@ -5,6 +5,7 @@ import co.edu.uniquindio.proyecto.domain.repository.UsuarioRepository;
 import co.edu.uniquindio.proyecto.domain.valueobject.Email;
 import co.edu.uniquindio.proyecto.domain.valueobject.TipoUsuario;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class CrearUsuarioUseCase {
 
     private final UsuarioRepository usuarioRepository;
+    private final PasswordEncoder passwordEncoder;
 
     /**
      * Crea y persiste un nuevo usuario en el sistema.
@@ -30,13 +32,13 @@ public class CrearUsuarioUseCase {
      * @return Usuario creado y persistido con su identificador generado.
      */
     @Transactional
-    public Usuario ejecutar(String nombre, String email, TipoUsuario tipoUsuario) {
+    public Usuario ejecutar(String nombre, String email, TipoUsuario tipoUsuario, String password) {
         Usuario usuario = new Usuario(
                 java.util.UUID.randomUUID().toString(),
                 nombre,
                 new Email(email),
                 tipoUsuario
         );
-        return usuarioRepository.save(usuario);
+        return usuarioRepository.save(usuario, passwordEncoder.encode(password));
     }
 }

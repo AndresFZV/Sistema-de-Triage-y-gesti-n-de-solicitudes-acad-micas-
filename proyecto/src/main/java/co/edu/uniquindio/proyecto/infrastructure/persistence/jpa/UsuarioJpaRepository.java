@@ -43,7 +43,7 @@ public class UsuarioJpaRepository implements UsuarioRepository {
      */
     @Override
     @Transactional
-    public Usuario save(Usuario usuario) {
+    public Usuario save(Usuario usuario, String passwordEncriptado) {
         Optional<UsuarioEntity> existente = dataRepository.findByCodigoExterno(usuario.getId());
 
         UsuarioEntity entity;
@@ -52,9 +52,12 @@ public class UsuarioJpaRepository implements UsuarioRepository {
             entity.setNombre(usuario.getNombre());
             entity.setEmail(usuario.getEmail().valor());
             entity.setTipoUsuario(TipoUsuarioEnum.valueOf(usuario.getTipoUsuario().name()));
+            if (passwordEncriptado != null) {
+                entity.setPassword(passwordEncriptado);
+            }
         } else {
             entity = mapper.toEntity(usuario);
-            entity.setPassword("{noop}sin-password");
+            entity.setPassword(passwordEncriptado != null ? passwordEncriptado : "{noop}sin-password");
             entity.setRolSeguridad(RolSeguridadEnum.USER);
         }
 

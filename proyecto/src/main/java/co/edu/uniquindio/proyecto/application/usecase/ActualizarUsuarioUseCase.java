@@ -38,6 +38,6 @@ public class ActualizarUsuarioUseCase {
                 .orElseThrow(() -> new UsuarioNoEncontradoException(id));
 
         Usuario actualizado = usuario.actualizar(nombre, new Email(email), tipoUsuario);
-        return usuarioRepository.save(actualizado);
+        return usuarioRepository.save(actualizado, null);
     }
 }
