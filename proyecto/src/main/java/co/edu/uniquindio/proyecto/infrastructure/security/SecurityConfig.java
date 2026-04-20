@@ -16,6 +16,15 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+/**
+ * Configuración principal de seguridad de la aplicación.
+ *
+ * <p>Define las reglas de autenticación y autorización, así como
+ * la configuración de filtros y políticas de sesión.</p>
+ *
+ * <p>Utiliza JWT como mecanismo de autenticación sin estado
+ * (stateless).</p>
+ */
 @Configuration
 @RequiredArgsConstructor
 @EnableMethodSecurity
@@ -24,6 +33,21 @@ public class SecurityConfig {
     private final JwtDecoder jwtDecoder;
     private final JwtBlacklistFilter jwtBlacklistFilter;
 
+    /**
+     * Configura la cadena de filtros de seguridad.
+     *
+     * <p>Define:</p>
+     * <ul>
+     *     <li>Endpoints públicos y protegidos</li>
+     *     <li>Política stateless</li>
+     *     <li>Integración con JWT</li>
+     *     <li>Filtro de blacklist de tokens</li>
+     * </ul>
+     *
+     * @param http Configuración HTTP de Spring Security.
+     * @return Cadena de filtros configurada.
+     * @throws Exception en caso de error de configuración.
+     */
     @Bean
     public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
         return http
@@ -55,11 +79,26 @@ public class SecurityConfig {
                 .build();
     }
 
+    /**
+     * Provee el AuthenticationManager de Spring Security.
+     *
+     * @param configuration Configuración de autenticación.
+     * @return AuthenticationManager.
+     * @throws Exception en caso de error.
+     */
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
         return configuration.getAuthenticationManager();
     }
 
+    /**
+     * Define el codificador de contraseñas.
+     *
+     * <p>Utiliza un delegating password encoder que soporta múltiples
+     * algoritmos de cifrado.</p>
+     *
+     * @return PasswordEncoder configurado.
+     */
     @Bean
     public PasswordEncoder passwordEncoder() {
         return PasswordEncoderFactories.createDelegatingPasswordEncoder();

@@ -22,6 +22,20 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.net.URI;
 import java.util.List;
 
+/**
+ * Controlador REST encargado de la gestión de usuarios del sistema.
+ *
+ * <p>Expone endpoints para la creación, consulta, actualización, eliminación
+ * y búsqueda de usuarios. También permite consultar las solicitudes asociadas
+ * a un usuario específico.</p>
+ *
+ * <p>La lógica de negocio es delegada a los casos de uso de la capa de aplicación,
+ * manteniendo la separación de responsabilidades conforme a la arquitectura
+ * basada en capas.</p>
+ *
+ * <p>La transformación entre entidades de dominio y respuestas REST se realiza
+ * mediante {@link SolicitudMapper}.</p>
+ */
 @RestController
 @RequestMapping("/api/usuarios")
 @RequiredArgsConstructor

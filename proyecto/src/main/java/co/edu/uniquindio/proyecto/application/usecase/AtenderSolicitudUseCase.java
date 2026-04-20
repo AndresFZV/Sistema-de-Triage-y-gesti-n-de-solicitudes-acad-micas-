@@ -12,6 +12,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * Caso de uso para marcar una solicitud como atendida.
+ *
+ * <p>Orquesta la validación de existencia del administrativo y la solicitud,
+ * delega la lógica de rol al {@link GestorSolicitudService} y notifica
+ * al solicitante una vez confirmada la atención.</p>
+ */
 @Service
 @RequiredArgsConstructor
 public class AtenderSolicitudUseCase {
@@ -21,6 +28,15 @@ public class AtenderSolicitudUseCase {
     private final GestorSolicitudService gestor;
     private final NotificacionService notificacionService;
 
+    /**
+     * Marca la solicitud como atendida por el administrativo indicado.
+     *
+     * @param codigo  Código único de la solicitud a atender.
+     * @param adminId Identificador del administrativo que ejecuta la acción.
+     * @return Solicitud actualizada en estado ATENDIDA.
+     * @throws SolicitudNoEncontradaException si no existe la solicitud.
+     * @throws UsuarioNoEncontradoException   si no existe el administrativo.
+     */
     @Transactional
     public Solicitud ejecutar(String codigo, String adminId) {
         Solicitud solicitud = solicitudRepository.findByCodigo(codigo)

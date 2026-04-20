@@ -8,12 +8,27 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * Caso de uso para registrar un nuevo usuario en el sistema.
+ *
+ * <p>Genera un identificador único automáticamente y construye
+ * la entidad {@code Usuario} con los datos proporcionados.
+ * La validación del email es delegada al value object {@code Email}.</p>
+ */
 @Service
 @RequiredArgsConstructor
 public class CrearUsuarioUseCase {
 
     private final UsuarioRepository usuarioRepository;
 
+    /**
+     * Crea y persiste un nuevo usuario en el sistema.
+     *
+     * @param nombre      Nombre completo del usuario.
+     * @param email       Email válido y único del usuario.
+     * @param tipoUsuario Rol del usuario en el sistema.
+     * @return Usuario creado y persistido con su identificador generado.
+     */
     @Transactional
     public Usuario ejecutar(String nombre, String email, TipoUsuario tipoUsuario) {
         Usuario usuario = new Usuario(

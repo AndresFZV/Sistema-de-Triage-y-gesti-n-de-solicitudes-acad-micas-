@@ -14,8 +14,13 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtGra
 import javax.crypto.spec.SecretKeySpec;
 
 /**
- * Configura el encoder y decoder JWT usando HMAC (HS256) simétrico.
- * Lee la clave secreta desde application.properties (jwt.secret).
+ * Configuración de componentes JWT para la aplicación.
+ *
+ * <p>Define los beans necesarios para codificar y decodificar tokens
+ * utilizando un algoritmo simétrico HMAC (HS256).</p>
+ *
+ * <p>La clave secreta es leída desde la configuración externa
+ * ({@code application.properties}).</p>
  */
 @Configuration
 public class JwtConfig {
@@ -23,6 +28,13 @@ public class JwtConfig {
     @Value("${jwt.secret}")
     private String jwtSecret;
 
+    /**
+     * Configura cómo se extraen las autoridades desde el token JWT.
+     *
+     * <p>Utiliza el claim "roles" sin prefijo adicional.</p>
+     *
+     * @return Convertidor de autenticación JWT.
+     */
     @Bean
     public JwtAuthenticationConverter jwtAuthenticationConverter() {
         JwtGrantedAuthoritiesConverter grantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
@@ -34,6 +46,13 @@ public class JwtConfig {
         return authenticationConverter;
     }
 
+    /**
+     * Configura el decodificador JWT.
+     *
+     * <p>Permite validar y leer tokens firmados con la clave secreta.</p>
+     *
+     * @return Bean {@link JwtDecoder}.
+     */
     @Bean
     public JwtDecoder jwtDecoder() {
         return NimbusJwtDecoder
@@ -41,6 +60,13 @@ public class JwtConfig {
                 .build();
     }
 
+    /**
+     * Configura el codificador JWT.
+     *
+     * <p>Permite generar tokens firmados con la clave secreta.</p>
+     *
+     * @return Bean {@link JwtEncoder}.
+     */
     @Bean
     public JwtEncoder jwtEncoder() {
         return new NimbusJwtEncoder(new ImmutableSecret<>(jwtSecret.getBytes()));

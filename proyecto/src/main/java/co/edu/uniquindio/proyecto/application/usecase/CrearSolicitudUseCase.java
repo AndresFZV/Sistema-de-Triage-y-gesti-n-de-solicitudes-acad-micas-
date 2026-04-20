@@ -11,6 +11,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * Caso de uso para registrar una nueva solicitud académica.
+ *
+ * <p>Verifica que el solicitante exista, delega la creación al
+ * {@link GestorSolicitudService}, persiste la solicitud y notifica
+ * al solicitante del registro exitoso.</p>
+ */
 @Service
 @RequiredArgsConstructor
 public class CrearSolicitudUseCase {
@@ -20,6 +27,14 @@ public class CrearSolicitudUseCase {
     private final GestorSolicitudService gestor;
     private final NotificacionService notificacionService;
 
+    /**
+     * Registra una nueva solicitud en estado CLASIFICACION.
+     *
+     * @param descripcion   Motivo de la solicitud. Debe tener entre 20 y 1000 caracteres.
+     * @param solicitanteId Identificador del usuario que registra la solicitud.
+     * @return Solicitud creada y persistida.
+     * @throws UsuarioNoEncontradoException si no existe el solicitante.
+     */
     @Transactional
     public Solicitud ejecutar(String descripcion, String solicitanteId) {
         Usuario solicitante = usuarioRepository.findById(solicitanteId)

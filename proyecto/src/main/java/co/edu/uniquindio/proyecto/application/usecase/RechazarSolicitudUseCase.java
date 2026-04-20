@@ -12,6 +12,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * Caso de uso para rechazar una solicitud durante su revisión.
+ *
+ * <p>El rechazo solo es posible cuando la solicitud está en estado EN_PROCESO
+ * y solo puede ejecutarlo un administrativo. La validación de rol y estado
+ * es delegada al {@link GestorSolicitudService} y al agregado {@code Solicitud}.</p>
+ */
 @Service
 @RequiredArgsConstructor
 public class RechazarSolicitudUseCase {
@@ -21,6 +28,15 @@ public class RechazarSolicitudUseCase {
     private final GestorSolicitudService gestor;
     private final NotificacionService notificacionService;
 
+    /**
+     * Rechaza la solicitud indicada por el administrativo.
+     *
+     * @param codigo  Código único de la solicitud a rechazar.
+     * @param adminId Identificador del administrativo que ejecuta el rechazo.
+     * @return Solicitud actualizada en estado RECHAZADA.
+     * @throws SolicitudNoEncontradaException si no existe la solicitud.
+     * @throws UsuarioNoEncontradoException   si no existe el administrativo.
+     */
     @Transactional
     public Solicitud ejecutar(String codigo, String adminId) {
         Solicitud solicitud = solicitudRepository.findByCodigo(codigo)

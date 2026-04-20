@@ -8,8 +8,15 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 /**
- * Inserta usuarios por defecto al iniciar la aplicación si la tabla está vacía.
- * Las contraseñas se encriptan con BCrypt antes de persistirse.
+ * Inicializador de usuarios por defecto al arrancar la aplicación.
+ *
+ * <p>Se ejecuta automáticamente al inicio gracias a {@link CommandLineRunner}.
+ * Solo inserta los usuarios si la tabla está completamente vacía, evitando
+ * duplicados en reinicios. Las contraseñas se encriptan con BCrypt antes
+ * de persistirse — nunca se almacenan en texto plano.</p>
+ *
+ * <p>Los usuarios se configuran en {@code application.properties} bajo
+ * el prefijo {@code default-users} y son mapeados por {@link DefaultUserProperties}.</p>
  */
 @Component
 @RequiredArgsConstructor
@@ -19,6 +26,11 @@ public class DefaultUserInitializer implements CommandLineRunner {
     private final UsuarioJpaDataRepository repository;
     private final PasswordEncoder encoder;
 
+    /**
+     * Inserta los usuarios por defecto si la tabla de usuarios está vacía.
+     *
+     * @param args Argumentos de línea de comandos (no utilizados).
+     */
     @Override
     public void run(String... args) {
         if (repository.count() == 0) {

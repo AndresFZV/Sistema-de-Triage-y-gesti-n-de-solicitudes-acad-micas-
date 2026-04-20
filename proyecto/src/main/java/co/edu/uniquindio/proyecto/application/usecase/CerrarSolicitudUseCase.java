@@ -12,6 +12,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * Caso de uso para cerrar definitivamente una solicitud.
+ *
+ * <p>El cierre es la última transición del ciclo de vida y solo es posible
+ * desde los estados ATENDIDA o RECHAZADA. Solo un administrativo puede
+ * ejecutar esta acción. La validación de rol y estado es delegada al
+ * {@link GestorSolicitudService} y al agregado {@code Solicitud}.</p>
+ */
 @Service
 @RequiredArgsConstructor
 public class CerrarSolicitudUseCase {
@@ -21,6 +29,15 @@ public class CerrarSolicitudUseCase {
     private final GestorSolicitudService gestor;
     private final NotificacionService notificacionService;
 
+    /**
+     * Cierra la solicitud indicada por el administrativo.
+     *
+     * @param codigo  Código único de la solicitud a cerrar.
+     * @param adminId Identificador del administrativo que ejecuta el cierre.
+     * @return Solicitud actualizada en estado CERRADA.
+     * @throws SolicitudNoEncontradaException si no existe la solicitud.
+     * @throws UsuarioNoEncontradoException   si no existe el administrativo.
+     */
     @Transactional
     public Solicitud ejecutar(String codigo, String adminId) {
         Solicitud solicitud = solicitudRepository.findByCodigo(codigo)

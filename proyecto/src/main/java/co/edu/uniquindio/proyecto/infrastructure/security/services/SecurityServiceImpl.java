@@ -18,6 +18,22 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
+/**
+ * Implementación del servicio de seguridad encargado de la autenticación
+ * y gestión de tokens JWT.
+ *
+ * <p>Se integra con Spring Security para autenticar usuarios y generar
+ * tokens de acceso y refresco. Además, gestiona la invalidación de tokens
+ * mediante una lista negra.</p>
+ *
+ * <p>Responsabilidades principales:</p>
+ * <ul>
+ *     <li>Autenticación de usuarios</li>
+ *     <li>Generación de access token y refresh token</li>
+ *     <li>Renovación de tokens</li>
+ *     <li>Invalidación de tokens (logout)</li>
+ * </ul>
+ */
 @Service("securityService")
 @RequiredArgsConstructor
 public class SecurityServiceImpl implements SecurityService {
@@ -33,6 +49,16 @@ public class SecurityServiceImpl implements SecurityService {
     @Value("${jwt.refresh-expiry}")
     private long refreshExpiry;
 
+    /**
+     * Autentica un usuario y genera tokens JWT.
+     *
+     * <p>Valida las credenciales mediante el {@link AuthenticationManager}
+     * y genera un access token y un refresh token con sus respectivas fechas
+     * de expiración.</p>
+     *
+     * @param request DTO con credenciales de acceso.
+     * @return {@link TokenResponse} con los tokens generados.
+     */
     @Override
     public TokenResponse login(LoginRequest request) {
         final var authentication = authenticationManager.authenticate(
@@ -57,6 +83,17 @@ public class SecurityServiceImpl implements SecurityService {
         return new TokenResponse(accessToken, refreshToken, "Bearer", expire, roles);
     }
 
+    /**
+     * Renueva un access token a partir de un refresh token válido.
+     *
+     * <p>Valida que el refresh token no esté invalidado, lo decodifica,
+     * extrae la información del usuario y genera nuevos tokens.</p>
+     *
+     * <p>El refresh token utilizado es invalidado para evitar reutilización.</p>
+     *
+     * @param request DTO con el refresh token.
+     * @return {@link TokenResponse} con los nuevos tokens.
+     */
     @Override
     public TokenResponse refresh(RefreshTokenRequest request) {
         if (tokenBlacklist.estaInvalidado(request.refreshToken())) {
@@ -83,6 +120,13 @@ public class SecurityServiceImpl implements SecurityService {
         return new TokenResponse(accessToken, newRefreshToken, "Bearer", expire, roles);
     }
 
+    /**
+     * Cierra la sesión del usuario invalidando el token.
+     *
+     * <p>El token es agregado a una lista negra para evitar su reutilización.</p>
+     *
+     * @param token Token de acceso a invalidar.
+     */
     @Override
     public void logout(String token) {
         tokenBlacklist.invalidar(token);

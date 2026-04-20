@@ -13,6 +13,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * Caso de uso para clasificar una solicitud asignándole un tipo.
+ *
+ * <p>Durante la clasificación, la prioridad es calculada automáticamente
+ * por el sistema con base en el tipo y el tiempo transcurrido desde la
+ * creación. Solo un administrativo puede ejecutar esta acción sobre una
+ * solicitud en estado CLASIFICACION.</p>
+ */
 @Service
 @RequiredArgsConstructor
 public class ClasificarSolicitudUseCase {
@@ -22,6 +30,16 @@ public class ClasificarSolicitudUseCase {
     private final GestorSolicitudService gestor;
     private final NotificacionService notificacionService;
 
+    /**
+     * Clasifica la solicitud asignándole el tipo indicado.
+     *
+     * @param codigo  Código único de la solicitud a clasificar.
+     * @param tipo    Tipo de solicitud asignado (ej. HOMOLOGACION, CANCELACION).
+     * @param adminId Identificador del administrativo que ejecuta la clasificación.
+     * @return Solicitud actualizada en estado PENDIENTE con tipo y prioridad asignados.
+     * @throws SolicitudNoEncontradaException si no existe la solicitud.
+     * @throws UsuarioNoEncontradoException   si no existe el administrativo.
+     */
     @Transactional
     public Solicitud ejecutar(String codigo, TipoSolicitud tipo, String adminId) {
         Solicitud solicitud = solicitudRepository.findByCodigo(codigo)

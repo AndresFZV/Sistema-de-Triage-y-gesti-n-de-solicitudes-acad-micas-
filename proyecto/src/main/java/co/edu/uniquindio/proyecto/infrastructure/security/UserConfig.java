@@ -7,12 +7,22 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 /**
- * Conecta Spring Security con la base de datos de usuarios.
- * Le indica al framework dónde buscar las credenciales durante el login.
+ * Configuración que integra Spring Security con la base de datos
+ * de usuarios del sistema.
+ *
+ * <p>Define un {@link UserDetailsService} personalizado que permite
+ * a Spring Security obtener las credenciales desde la base de datos.</p>
  */
 @Configuration
 public class UserConfig {
 
+    /**
+     * Implementación de {@link UserDetailsService} que consulta
+     * los usuarios desde la base de datos.
+     *
+     * @param repository Repositorio JPA de usuarios.
+     * @return Servicio de detalles de usuario.
+     */
     @Bean
     public UserDetailsService userDetailsServiceFromDataBase(UsuarioJpaDataRepository repository) {
         return username -> repository.findByEmail(username)

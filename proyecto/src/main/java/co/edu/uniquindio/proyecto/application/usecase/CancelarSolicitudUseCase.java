@@ -12,6 +12,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * Caso de uso para cancelar una solicitud.
+ *
+ * <p>La cancelación solo puede ejecutarla el propio solicitante y únicamente
+ * cuando la solicitud está en estado PENDIENTE. La validación de identidad
+ * es delegada al agregado {@code Solicitud} a través del
+ * {@link GestorSolicitudService}.</p>
+ */
 @Service
 @RequiredArgsConstructor
 public class CancelarSolicitudUseCase {
@@ -21,6 +29,15 @@ public class CancelarSolicitudUseCase {
     private final GestorSolicitudService gestor;
     private final NotificacionService notificacionService;
 
+    /**
+     * Cancela la solicitud indicada por el solicitante original.
+     *
+     * @param codigo        Código único de la solicitud a cancelar.
+     * @param solicitanteId Identificador del solicitante que ejecuta la cancelación.
+     * @return Solicitud actualizada en estado CANCELADA.
+     * @throws SolicitudNoEncontradaException si no existe la solicitud.
+     * @throws UsuarioNoEncontradoException   si no existe el solicitante.
+     */
     @Transactional
     public Solicitud ejecutar(String codigo, String solicitanteId) {
         Solicitud solicitud = solicitudRepository.findByCodigo(codigo)

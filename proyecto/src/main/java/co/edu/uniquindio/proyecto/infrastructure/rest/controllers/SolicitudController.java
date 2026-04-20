@@ -27,6 +27,26 @@ import java.net.URI;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Controlador REST encargado de la gestión del ciclo de vida de las solicitudes académicas.
+ *
+ * <p>Expone endpoints para la creación, consulta, actualización de estado y generación
+ * de reportes relacionados con las solicitudes. Actúa como punto de entrada de la capa
+ * de presentación, delegando la lógica de negocio a los casos de uso definidos en la
+ * capa de aplicación.</p>
+ *
+ * <p>Este controlador implementa operaciones como:</p>
+ * <ul>
+ *     <li>Registro de solicitudes</li>
+ *     <li>Consulta y filtrado con paginación</li>
+ *     <li>Transiciones de estado (clasificar, revisar, atender, rechazar, cerrar, cancelar)</li>
+ *     <li>Consultas específicas del usuario</li>
+ *     <li>Generación de reportes y dashboard</li>
+ * </ul>
+ *
+ * <p>La transformación entre entidades de dominio y respuestas REST se realiza mediante
+ * {@link SolicitudMapper}.</p>
+ */
 @RestController
 @RequestMapping("/api/solicitudes")
 @RequiredArgsConstructor
