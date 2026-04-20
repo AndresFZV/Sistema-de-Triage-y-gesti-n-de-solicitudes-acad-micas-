@@ -115,6 +115,12 @@ Al iniciar la aplicación se insertan automáticamente estos usuarios de prueba:
 | `admin@solicitudes.com` | `admin123` | ADMIN | ADMINISTRATIVO |
 | `agente@solicitudes.com` | `agente123` | USER | ESTUDIANTE |
 
+Para obtener el `codigoExterno` del admin (necesario para clasificar solicitudes), conectarse a la consola H2 y ejecutar:
+
+```sql
+SELECT codigo_externo, email, tipo_usuario FROM usuarios;
+```
+
 ---
 
 ## Autenticación JWT
@@ -145,7 +151,7 @@ Respuesta:
 ### Uso del token en Swagger
 
 1. Copia el valor del campo `token`
-2. Haz clic en el botón **Authorize** en Swagger UI
+2. Haz clic en el botón **Authorize** en la parte superior de Swagger UI
 3. Escribe `Bearer {token}` y confirma
 
 ### Refresh Token
@@ -164,6 +170,185 @@ Content-Type: application/json
 ```http
 POST /api/auth/logout
 Authorization: Bearer {token}
+```
+
+---
+
+## Guía de Inicio Rápido
+
+### Paso 1 — Hacer login y obtener el token
+
+```http
+POST /api/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin@solicitudes.com",
+  "password": "admin123"
+}
+```
+
+Copia el `token` de la respuesta y autorízate en Swagger con `Bearer {token}`.
+
+---
+
+### Paso 2 — Crear un usuario solicitante
+
+```http
+POST /api/usuarios
+Authorization: Bearer {token}
+Content-Type: application/json
+
+{
+  "nombre": "Juan Pérez",
+  "email": "juan@uniquindio.edu.co",
+  "tipoUsuario": "ESTUDIANTE"
+}
+```
+
+Respuesta:
+```json
+{
+  "id": "43483677-e069-4c57-903a-213bfdacbcba",
+  "nombre": "Juan Pérez",
+  "email": "juan@uniquindio.edu.co",
+  "tipoUsuario": "ESTUDIANTE"
+}
+```
+
+> Copia el campo `id` — es el `codigoExterno` del usuario y lo necesitarás para crear solicitudes.
+
+---
+
+### Paso 3 — Crear una solicitud
+
+```http
+POST /api/solicitudes
+Authorization: Bearer {token}
+Content-Type: application/json
+
+{
+  "descripcion": "Solicito homologación de la materia Cálculo I cursada en otra institución.",
+  "solicitanteId": "43483677-e069-4c57-903a-213bfdacbcba"
+}
+```
+
+Respuesta:
+```json
+{
+  "codigo": "SOL-1776580125237",
+  "descripcion": "Solicito homologación...",
+  "estado": "CLASIFICACION",
+  "tipoSolicitud": null,
+  "prioridad": null,
+  "fechaCreacion": "2026-04-19T...",
+  "solicitante": { ... },
+  "responsable": null
+}
+```
+
+> Copia el `codigo` — lo necesitarás para los siguientes pasos.
+
+---
+
+### Paso 4 — Clasificar la solicitud
+
+```http
+PATCH /api/solicitudes/SOL-1776580125237/clasificar
+Authorization: Bearer {token}
+Content-Type: application/json
+
+{
+  "tipoSolicitud": "HOMOLOGACION",
+  "adminId": "codigoExterno-del-admin"
+}
+```
+
+> El `adminId` es el `codigoExterno` del admin. Consúltalo en H2 con `SELECT * FROM USUARIOS`.
+
+La prioridad se calcula automáticamente. El estado cambia a `PENDIENTE`.
+
+---
+
+### Paso 5 — Asignar responsable
+
+```http
+PATCH /api/solicitudes/SOL-1776580125237/revision
+Authorization: Bearer {token}
+Content-Type: application/json
+
+{
+  "responsableId": "codigoExterno-del-admin"
+}
+```
+
+El estado cambia a `EN_PROCESO`.
+
+---
+
+### Paso 6 — Atender la solicitud
+
+```http
+PATCH /api/solicitudes/SOL-1776580125237/atender
+Authorization: Bearer {token}
+Content-Type: application/json
+
+{
+  "adminId": "codigoExterno-del-admin"
+}
+```
+
+El estado cambia a `ATENDIDA`.
+
+---
+
+### Paso 7 — Cerrar la solicitud
+
+```http
+PATCH /api/solicitudes/SOL-1776580125237/cerrar
+Authorization: Bearer {token}
+Content-Type: application/json
+
+{
+  "adminId": "codigoExterno-del-admin"
+}
+```
+
+El estado cambia a `CERRADA`.
+
+---
+
+### Paso 8 — Ver el historial
+
+```http
+GET /api/solicitudes/SOL-1776580125237/historial
+Authorization: Bearer {token}
+```
+
+---
+
+### Paso 9 — Ver el dashboard
+
+```http
+GET /api/solicitudes/dashboard
+Authorization: Bearer {token}
+```
+
+Respuesta:
+```json
+{
+  "totalSolicitudes": 1,
+  "pendientes": 0,
+  "enProceso": 0,
+  "atendidas": 0,
+  "rechazadas": 0,
+  "cerradas": 1,
+  "canceladas": 0,
+  "sinResponsable": 0,
+  "porTipo": {
+    "HOMOLOGACION": 1
+  }
+}
 ```
 
 ---
@@ -225,20 +410,6 @@ Authorization: Bearer {token}
 | `page` | int | Número de página (default: 0) |
 | `size` | int | Tamaño de página (default: 10) |
 | `sortBy` | string | Campo de ordenamiento (default: fechaCreacion) |
-
----
-
-## Flujo de Prueba Completo
-
-1. **Login** con `admin@solicitudes.com` / `admin123`
-2. **Crear un usuario** estudiante con `POST /api/usuarios`
-3. **Crear una solicitud** con el `codigoExterno` del usuario creado
-4. **Clasificar** la solicitud con `PATCH /api/solicitudes/{codigo}/clasificar`
-5. **Asignar responsable** con `PATCH /api/solicitudes/{codigo}/revision`
-6. **Atender** con `PATCH /api/solicitudes/{codigo}/atender`
-7. **Cerrar** con `PATCH /api/solicitudes/{codigo}/cerrar`
-8. **Ver el historial** con `GET /api/solicitudes/{codigo}/historial`
-9. **Ver el dashboard** con `GET /api/solicitudes/dashboard`
 
 ---
 
