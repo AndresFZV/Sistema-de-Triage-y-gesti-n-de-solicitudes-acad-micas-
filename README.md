@@ -202,7 +202,8 @@ Content-Type: application/json
 {
   "nombre": "Juan Pérez",
   "email": "juan@uniquindio.edu.co",
-  "tipoUsuario": "ESTUDIANTE"
+  "tipoUsuario": "ESTUDIANTE",
+  "password": "mipassword123"
 }
 ```
 
