@@ -1,41 +1,58 @@
-import { Component } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
-import { AuthService } from '../../servicios/auth.service';
-import { LoginRequest } from '../../dto/auth.dto';
-import { RouterLink } from '@angular/router';
+import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Router, RouterLink } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
+import { LoginRequest, TokenResponse } from '../../modelos/auth';
 
 @Component({
   selector: 'app-login',
-  imports: [FormsModule, RouterLink],
+  imports: [ReactiveFormsModule, RouterLink],
   templateUrl: './login.html',
   styleUrl: './login.css'
 })
 export class Login {
 
-  request: LoginRequest = {
-    username: '',
-    password: ''
-  };
+  private http = inject(HttpClient);
+  private router = inject(Router);
+  private destroyRef = inject(DestroyRef);
 
-  error: string = '';
-  cargando: boolean = false;
+  loginForm = inject(FormBuilder).group({
+    username: ['', [Validators.required, Validators.email]],
+    password: ['', [Validators.required, Validators.minLength(6)]]
+  });
 
-  constructor(private authService: AuthService, private router: Router) {}
+  isLoading = signal(false);
+  result = signal('');
 
-  login(): void {
-    this.error = '';
-    this.cargando = true;
+  formStatus = toSignal(this.loginForm.statusChanges, {
+    initialValue: 'INVALID' as const
+  });
 
-    this.authService.login(this.request).subscribe({
-      next: (response) => {
-        this.authService.guardarToken(response);
-        this.router.navigate(['/dashboard']);
-      },
-      error: (err) => {
-        this.error = 'Credenciales incorrectas. Verifica tu email y contraseña.';
-        this.cargando = false;
-      }
-    });
+  canSubmit = computed(() =>
+    this.formStatus() === 'VALID' && !this.isLoading()
+  );
+
+  onSubmit(): void {
+    if (!this.canSubmit()) return;
+
+    this.isLoading.set(true);
+    const credenciales = this.loginForm.value as LoginRequest;
+
+    this.http.post<TokenResponse>('http://localhost:8080/api/auth/login', credenciales)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (response) => {
+          localStorage.setItem('token', response.token);
+          localStorage.setItem('refreshToken', response.refreshToken);
+          localStorage.setItem('roles', JSON.stringify(response.roles));
+          this.result.set('Sesión iniciada correctamente');
+          this.router.navigate(['/dashboard']);
+        },
+        error: () => {
+          this.isLoading.set(false);
+          this.result.set('Credenciales inválidas. Verifica tu correo y contraseña.');
+        }
+      });
   }
 }

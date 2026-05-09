@@ -1,0 +1,41 @@
+<div class="solicitud-container">
+  <div class="solicitud-card">
+    <h2>Nueva Solicitud</h2>
+
+    <form [formGroup]="solicitudForm" (ngSubmit)="onSubmit()">
+
+      <div class="form-group">
+        <label>Descripción:</label>
+        <textarea
+          formControlName="descripcion"
+          rows="4"
+          placeholder="Describe tu solicitud (mínimo 10 caracteres)"
+        ></textarea>
+        @if (solicitudForm.get('descripcion')?.invalid && solicitudForm.get('descripcion')?.touched) {
+          <div class="error">La descripción debe tener entre 10 y 500 caracteres.</div>
+        }
+      </div>
+
+      <div class="form-group">
+        <label>ID del solicitante:</label>
+        <input type="text" formControlName="solicitanteId" placeholder="UUID del solicitante" />
+        @if (solicitudForm.get('solicitanteId')?.invalid && solicitudForm.get('solicitanteId')?.touched) {
+          <div class="error">El ID del solicitante es obligatorio.</div>
+        }
+      </div>
+
+      <button type="submit" [disabled]="solicitudForm.invalid || isLoading()">
+        @if (isLoading()) { Enviando... } @else { Registrar Solicitud }
+      </button>
+
+      @if (result()) {
+        <div class="result">{{ result() }}</div>
+      }
+
+    </form>
+
+    <p class="volver">
+      <a routerLink="/dashboard">← Volver al dashboard</a>
+    </p>
+  </div>
+</div>

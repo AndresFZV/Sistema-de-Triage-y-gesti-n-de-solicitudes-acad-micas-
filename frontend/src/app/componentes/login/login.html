@@ -3,38 +3,30 @@
     <h2>Sistema de Triage Académico</h2>
     <h3>Iniciar Sesión</h3>
 
-    @if (error) {
-      <div class="error">{{ error }}</div>
-    }
-
-    <form (ngSubmit)="login()">
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
       <div class="form-group">
-        <label for="username">Email</label>
-        <input
-          id="username"
-          type="email"
-          [(ngModel)]="request.username"
-          name="username"
-          placeholder="admin@solicitudes.com"
-          required
-        />
+        <label>Correo electrónico:</label>
+        <input type="email" formControlName="username" placeholder="admin@solicitudes.com" />
+        @if (loginForm.get('username')?.invalid && loginForm.get('username')?.touched) {
+          <div class="error">Ingresa un correo electrónico válido.</div>
+        }
       </div>
 
       <div class="form-group">
-        <label for="password">Contraseña</label>
-        <input
-          id="password"
-          type="password"
-          [(ngModel)]="request.password"
-          name="password"
-          placeholder="••••••••"
-          required
-        />
+        <label>Contraseña:</label>
+        <input type="password" formControlName="password" placeholder="••••••••" />
+        @if (loginForm.get('password')?.invalid && loginForm.get('password')?.touched) {
+          <div class="error">La contraseña debe tener al menos 6 caracteres.</div>
+        }
       </div>
 
-      <button type="submit" [disabled]="cargando">
-        {{ cargando ? 'Ingresando...' : 'Ingresar' }}
+      <button type="submit" [disabled]="!canSubmit()">
+        @if (isLoading()) { Ingresando... } @else { Ingresar }
       </button>
+
+      @if (result()) {
+        <div class="result">{{ result() }}</div>
+      }
     </form>
 
     <p class="registro-link">

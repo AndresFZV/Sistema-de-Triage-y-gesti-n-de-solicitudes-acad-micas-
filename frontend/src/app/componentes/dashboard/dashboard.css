@@ -1,0 +1,145 @@
+.dashboard-container {
+  min-height: 100vh;
+  background-color: #f0f2f5;
+}
+
+.navbar {
+  background-color: #1a1a2e;
+  color: white;
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.navbar h1 {
+  font-size: 1.2rem;
+  margin: 0;
+}
+
+.nav-links {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.nav-links a {
+  color: white;
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+.nav-links a:hover {
+  text-decoration: underline;
+}
+
+.nav-links button {
+  background-color: #e74c3c;
+  color: white;
+  border: none;
+  padding: 0.4rem 0.8rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.nav-links button:hover {
+  background-color: #c0392b;
+}
+
+.contenido {
+  padding: 2rem;
+}
+
+.contenido h2 {
+  color: #1a1a2e;
+  margin-bottom: 1.5rem;
+}
+
+.cargando {
+  text-align: center;
+  color: #666;
+  padding: 2rem;
+}
+
+.error {
+  background-color: #ffe0e0;
+  color: #c0392b;
+  padding: 1rem;
+  border-radius: 4px;
+}
+
+.tarjetas {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.tarjeta {
+  background: white;
+  border-radius: 8px;
+  padding: 1.5rem;
+  text-align: center;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  border-top: 4px solid #ccc;
+}
+
+.tarjeta .numero {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #1a1a2e;
+}
+
+.tarjeta .label {
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.total { border-top-color: #4a90e2; }
+.pendiente { border-top-color: #f39c12; }
+.proceso { border-top-color: #3498db; }
+.atendida { border-top-color: #27ae60; }
+.rechazada { border-top-color: #e74c3c; }
+.cerrada { border-top-color: #95a5a6; }
+.cancelada { border-top-color: #8e44ad; }
+.sin-responsable { border-top-color: #e67e22; }
+
+.reporte {
+  background: white;
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+
+.reporte h3 {
+  color: #1a1a2e;
+  margin-bottom: 1rem;
+}
+
+.tipos {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.tipo-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem;
+  border-radius: 4px;
+  background-color: #f8f9fa;
+}
+
+.tipo-nombre {
+  color: #444;
+  font-size: 0.9rem;
+}
+
+.tipo-valor {
+  font-weight: bold;
+  color: #1a1a2e;
+}
