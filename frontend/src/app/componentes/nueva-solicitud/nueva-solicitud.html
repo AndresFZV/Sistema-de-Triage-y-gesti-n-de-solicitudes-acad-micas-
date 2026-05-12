@@ -16,15 +16,11 @@
         }
       </div>
 
-      <div class="form-group">
-        <label>ID del solicitante:</label>
-        <input type="text" formControlName="solicitanteId" placeholder="UUID del solicitante" />
-        @if (solicitudForm.get('solicitanteId')?.invalid && solicitudForm.get('solicitanteId')?.touched) {
-          <div class="error">El ID del solicitante es obligatorio.</div>
-        }
-      </div>
+      @if (!solicitanteId()) {
+        <div class="error">No se pudo obtener tu ID de usuario. Intenta cerrar sesión y volver a ingresar.</div>
+      }
 
-      <button type="submit" [disabled]="solicitudForm.invalid || isLoading()">
+      <button type="submit" [disabled]="solicitudForm.invalid || isLoading() || !solicitanteId()">
         @if (isLoading()) { Enviando... } @else { Registrar Solicitud }
       </button>
 

@@ -44,7 +44,8 @@ public class JwtBlacklistFilter extends OncePerRequestFilter {
         String authHeader = request.getHeader("Authorization");
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             String token = authHeader.substring(7);
-            if (tokenBlacklist.estaInvalidado(token)) {
+            // Solo verificar blacklist si el token tiene formato JWT válido
+            if (token.split("\\.").length == 3 && tokenBlacklist.estaInvalidado(token)) {
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 response.getWriter().write("Token invalidado");
                 return;

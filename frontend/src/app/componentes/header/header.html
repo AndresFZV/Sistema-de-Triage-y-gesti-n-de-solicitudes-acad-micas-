@@ -1,0 +1,63 @@
+<nav class="navbar navbar-expand-md bg-body-tertiary shadow-sm">
+  <div class="container">
+    <a routerLink="/" class="navbar-brand d-flex align-items-center gap-2">
+      <i class="fa-solid fa-file-alt"></i>
+      <span>Solicitudes UQ</span>
+    </a>
+
+    <button class="navbar-toggler" type="button"
+      data-bs-toggle="collapse" data-bs-target="#navMenu">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navMenu">
+      <ul class="navbar-nav me-auto">
+        @if (isLoggedIn()) {
+          @if (esAdminOAdministrativo) {
+            <li class="nav-item">
+              <a routerLink="/dashboard" routerLinkActive="active" class="nav-link">
+                <i class="fa-solid fa-chart-line me-1"></i>Dashboard
+              </a>
+            </li>
+            <li class="nav-item">
+              <a routerLink="/lista-solicitudes" routerLinkActive="active" class="nav-link">
+                <i class="fa-solid fa-list me-1"></i>Solicitudes
+              </a>
+            </li>
+            <li class="nav-item">
+              <a routerLink="/usuarios" routerLinkActive="active" class="nav-link">
+                <i class="fa-solid fa-users me-1"></i>Usuarios
+              </a>
+            </li>
+          } @else {
+            <li class="nav-item">
+              <a routerLink="/mis-solicitudes" routerLinkActive="active" class="nav-link">
+                <i class="fa-solid fa-list me-1"></i>Mis Solicitudes
+              </a>
+            </li>
+            <li class="nav-item">
+              <a routerLink="/nueva-solicitud" routerLinkActive="active" class="nav-link">
+                <i class="fa-solid fa-plus me-1"></i>Nueva Solicitud
+              </a>
+            </li>
+          }
+        }
+      </ul>
+
+      <div class="d-flex gap-2">
+        @if (isLoggedIn()) {
+          <button class="btn btn-outline-danger btn-sm" (click)="cerrarSesion()">
+            <i class="fa-solid fa-right-from-bracket me-1"></i>Cerrar Sesión
+          </button>
+        } @else {
+          <a routerLink="/login" class="btn btn-outline-primary btn-sm">
+            <i class="fa-solid fa-right-to-bracket me-1"></i>Ingresar
+          </a>
+          <a routerLink="/registro" class="btn btn-outline-secondary btn-sm">
+            <i class="fa-solid fa-user-plus me-1"></i>Registrarse
+          </a>
+        }
+      </div>
+    </div>
+  </div>
+</nav>

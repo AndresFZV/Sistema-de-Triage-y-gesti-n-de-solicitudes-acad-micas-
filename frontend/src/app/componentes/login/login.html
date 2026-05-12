@@ -1,36 +1,62 @@
-<div class="login-container">
-  <div class="login-card">
-    <h2>Sistema de Triage Académico</h2>
-    <h3>Iniciar Sesión</h3>
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-5">
+      <div class="card shadow-sm">
+        <div class="card-header text-center py-3">
+          <h5 class="mb-0">
+            <i class="fa-solid fa-right-to-bracket me-2"></i>Iniciar Sesión
+          </h5>
+        </div>
+        <div class="card-body">
+          <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+            <div class="mb-3">
+              <label class="form-label">Correo electrónico</label>
+              <input type="email" formControlName="username"
+                class="form-control" placeholder="correo@ejemplo.com" />
+              @if (loginForm.get('username')?.invalid && loginForm.get('username')?.touched) {
+                <div class="text-danger small mt-1">
+                  Ingresa un correo electrónico válido.
+                </div>
+              }
+            </div>
 
-    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
-      <div class="form-group">
-        <label>Correo electrónico:</label>
-        <input type="email" formControlName="username" placeholder="admin@solicitudes.com" />
-        @if (loginForm.get('username')?.invalid && loginForm.get('username')?.touched) {
-          <div class="error">Ingresa un correo electrónico válido.</div>
-        }
+            <div class="mb-3">
+              <label class="form-label">Contraseña</label>
+              <input type="password" formControlName="password"
+                class="form-control" placeholder="••••••" />
+              @if (loginForm.get('password')?.invalid && loginForm.get('password')?.touched) {
+                <div class="text-danger small mt-1">
+                  La contraseña debe tener al menos 6 caracteres.
+                </div>
+              }
+            </div>
+
+            <div class="d-grid">
+              <button type="submit" class="btn btn-primary" [disabled]="!canSubmit()">
+                @if (isLoading()) {
+                  <span class="spinner-border spinner-border-sm me-2"></span>
+                  Ingresando...
+                } @else {
+                  <i class="fa-solid fa-right-to-bracket me-2"></i>Ingresar
+                }
+              </button>
+            </div>
+
+            @if (result()) {
+              <div class="alert mt-3"
+                [class.alert-success]="result().includes('correctamente')"
+                [class.alert-danger]="!result().includes('correctamente')">
+                {{ result() }}
+              </div>
+            }
+          </form>
+        </div>
+        <div class="card-footer text-center py-3">
+          <small class="text-muted">
+            ¿No tienes cuenta? <a routerLink="/registro">Regístrate aquí</a>
+          </small>
+        </div>
       </div>
-
-      <div class="form-group">
-        <label>Contraseña:</label>
-        <input type="password" formControlName="password" placeholder="••••••••" />
-        @if (loginForm.get('password')?.invalid && loginForm.get('password')?.touched) {
-          <div class="error">La contraseña debe tener al menos 6 caracteres.</div>
-        }
-      </div>
-
-      <button type="submit" [disabled]="!canSubmit()">
-        @if (isLoading()) { Ingresando... } @else { Ingresar }
-      </button>
-
-      @if (result()) {
-        <div class="result">{{ result() }}</div>
-      }
-    </form>
-
-    <p class="registro-link">
-      ¿No tienes cuenta? <a routerLink="/registro">Regístrate aquí</a>
-    </p>
+    </div>
   </div>
 </div>

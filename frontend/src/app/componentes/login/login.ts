@@ -4,6 +4,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { LoginRequest, TokenResponse } from '../../modelos/auth';
+import { AuthService } from '../../servicios/auth.service';
 
 @Component({
   selector: 'app-login',
@@ -16,6 +17,7 @@ export class Login {
   private http = inject(HttpClient);
   private router = inject(Router);
   private destroyRef = inject(DestroyRef);
+  private authService = inject(AuthService);
 
   loginForm = inject(FormBuilder).group({
     username: ['', [Validators.required, Validators.email]],
@@ -43,12 +45,13 @@ export class Login {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (response) => {
-          localStorage.setItem('token', response.token);
-          localStorage.setItem('refreshToken', response.refreshToken);
-          localStorage.setItem('roles', JSON.stringify(response.roles));
-          this.result.set('Sesión iniciada correctamente');
-          this.router.navigate(['/dashboard']);
-        },
+  localStorage.setItem('token', response.token);
+  localStorage.setItem('refreshToken', response.refreshToken);
+  localStorage.setItem('roles', JSON.stringify(response.roles));
+  this.authService.isAuthenticated.set(true); // ← esto faltaba
+  this.result.set('Sesión iniciada correctamente');
+  this.router.navigate(['/dashboard']);
+},
         error: () => {
           this.isLoading.set(false);
           this.result.set('Credenciales inválidas. Verifica tu correo y contraseña.');

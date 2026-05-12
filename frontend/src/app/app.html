@@ -1,1 +1,7 @@
-<router-outlet />
+<app-header></app-header>
+<router-outlet></router-outlet>
+@defer (on viewport) {
+  <app-footer></app-footer>
+} @placeholder {
+  <div></div>
+}
