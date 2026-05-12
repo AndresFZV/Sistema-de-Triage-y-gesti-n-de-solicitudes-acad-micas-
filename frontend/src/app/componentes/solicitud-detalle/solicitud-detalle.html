@@ -20,6 +20,7 @@
         <i class="fa-solid fa-arrow-left me-1"></i>Volver
       </button>
     </div>
+
     <div class="row g-4">
       <div class="col-md-8">
         <div class="card shadow-sm">
@@ -31,6 +32,27 @@
           </div>
           <div class="card-body">
             <p><strong>Descripción:</strong> {{ solicitud().descripcion }}</p>
+
+            <div class="mb-3">
+              <button class="btn btn-outline-secondary btn-sm"
+                (click)="generarResumen()"
+                [disabled]="cargandoResumen()">
+                @if (cargandoResumen()) {
+                  <span class="spinner-border spinner-border-sm me-1"></span>
+                  Resumiendo...
+                } @else {
+                  <i class="fa-solid fa-robot me-1"></i>Resumir con IA
+                }
+              </button>
+
+              @if (resumenIA()) {
+                <div class="alert alert-info py-2 px-3 mt-2 mb-0 small">
+                  <i class="fa-solid fa-lightbulb me-1"></i>
+                  <strong>Resumen IA:</strong> {{ resumenIA() }}
+                </div>
+              }
+            </div>
+
             <p><strong>Tipo:</strong> {{ solicitud().tipoSolicitud ?? 'Sin clasificar' }}</p>
             <p><strong>Prioridad:</strong> {{ solicitud().prioridad ?? 'Sin asignar' }}</p>
             <p><strong>Fecha:</strong> {{ solicitud().fechaCreacion | slice:0:10 }}</p>

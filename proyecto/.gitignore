@@ -31,3 +31,8 @@ build/
 
 ### VS Code ###
 .vscode/
+
+proyecto/src/main/resources/application.properties
+proyecto/target/
+proyecto/.idea/
+.env

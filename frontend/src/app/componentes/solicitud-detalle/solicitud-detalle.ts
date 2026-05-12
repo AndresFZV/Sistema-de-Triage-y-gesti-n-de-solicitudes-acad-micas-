@@ -25,6 +25,8 @@ export class SolicitudDetalle implements OnInit {
   admins = signal<any[]>([]);
   cargando = signal(true);
   error = signal('');
+  resumenIA = signal('');
+  cargandoResumen = signal(false);
 
   esAdmin = this.authService.esAdmin();
   esAdministrativo = this.authService.esAdministrativo();
@@ -83,6 +85,24 @@ export class SolicitudDetalle implements OnInit {
       .subscribe({
         next: (data) => this.historial.set(data),
         error: () => {}
+      });
+  }
+
+  generarResumen(): void {
+    const descripcion = this.solicitud()?.descripcion;
+    if (!descripcion) return;
+
+    this.cargandoResumen.set(true);
+    this.http.post<any>('http://localhost:8080/api/ia/resumir', { descripcion })
+      .subscribe({
+        next: (res) => {
+          this.resumenIA.set(res.resumen);
+          this.cargandoResumen.set(false);
+        },
+        error: () => {
+          this.notificacion.error('No se pudo generar el resumen.');
+          this.cargandoResumen.set(false);
+        }
       });
   }
 

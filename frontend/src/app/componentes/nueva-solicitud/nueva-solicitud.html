@@ -1,37 +1,76 @@
 <div class="solicitud-container">
   <div class="solicitud-card">
-    <h2>Nueva Solicitud</h2>
+    <h2><i class="fa-solid fa-file-plus me-2"></i>Nueva Solicitud</h2>
 
     <form [formGroup]="solicitudForm" (ngSubmit)="onSubmit()">
 
       <div class="form-group">
-        <label>Descripción:</label>
+        <label>Descripción</label>
         <textarea
           formControlName="descripcion"
-          rows="4"
-          placeholder="Describe tu solicitud (mínimo 10 caracteres)"
+          rows="5"
+          class="form-control"
+          placeholder="Describe tu solicitud con el mayor detalle posible (mínimo 10 caracteres)"
         ></textarea>
         @if (solicitudForm.get('descripcion')?.invalid && solicitudForm.get('descripcion')?.touched) {
-          <div class="error">La descripción debe tener entre 10 y 500 caracteres.</div>
+          <div class="text-danger small mt-1">La descripción debe tener entre 10 y 500 caracteres.</div>
         }
       </div>
 
-      @if (!solicitanteId()) {
-        <div class="error">No se pudo obtener tu ID de usuario. Intenta cerrar sesión y volver a ingresar.</div>
-      }
-
-      <button type="submit" [disabled]="solicitudForm.invalid || isLoading() || !solicitanteId()">
-        @if (isLoading()) { Enviando... } @else { Registrar Solicitud }
+      <button type="button" class="btn btn-outline-secondary w-100 mb-3"
+        (click)="analizarConIA()"
+        [disabled]="analizandoIA()">
+        @if (analizandoIA()) {
+          <span class="spinner-border spinner-border-sm me-2"></span>
+          Analizando con IA...
+        } @else {
+          <i class="fa-solid fa-robot me-2"></i>Analizar con IA
+        }
       </button>
 
-      @if (result()) {
-        <div class="result">{{ result() }}</div>
+      @if (tipoSugerido()) {
+        <div class="alert alert-info py-2 px-3 mb-3">
+          <i class="fa-solid fa-tag me-1"></i>
+          <strong>Tipo sugerido por IA:</strong> {{ tipoSugerido() }}
+        </div>
       }
+
+      @if (validacionIA() && validacionIA() !== 'OK') {
+        <div class="alert alert-warning py-2 px-3 mb-3">
+          <i class="fa-solid fa-triangle-exclamation me-1"></i>
+          <strong>Sugerencia de IA:</strong> {{ validacionIA() }}
+        </div>
+      }
+
+      @if (validacionIA() === 'OK') {
+        <div class="alert alert-success py-2 px-3 mb-3">
+          <i class="fa-solid fa-circle-check me-1"></i>
+          Tu descripción es clara y suficiente.
+        </div>
+      }
+
+      @if (!solicitanteId()) {
+        <div class="alert alert-warning small">
+          No se pudo obtener tu ID. Intenta cerrar sesión y volver a ingresar.
+        </div>
+      }
+
+      <button type="submit" class="btn btn-primary w-100"
+        [disabled]="solicitudForm.invalid || isLoading() || !solicitanteId()">
+        @if (isLoading()) {
+          <span class="spinner-border spinner-border-sm me-2"></span>
+          Enviando...
+        } @else {
+          <i class="fa-solid fa-paper-plane me-2"></i>Registrar Solicitud
+        }
+      </button>
 
     </form>
 
-    <p class="volver">
-      <a routerLink="/dashboard">← Volver al dashboard</a>
+    <p class="volver mt-3">
+      <a routerLink="/mis-solicitudes">
+        <i class="fa-solid fa-arrow-left me-1"></i>Volver a mis solicitudes
+      </a>
     </p>
   </div>
 </div>
