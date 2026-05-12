@@ -1,34 +1,36 @@
 import { HttpInterceptorFn } from '@angular/common/http';
-
-const RUTAS_PUBLICAS = [
-  '/api/auth/login',
-  '/api/auth/refresh',
-];
+import { inject } from '@angular/core';
+import { Router } from '@angular/router';
+import { catchError, throwError } from 'rxjs';
+import { AuthService } from '../servicios/auth.service';
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
-  const token = localStorage.getItem('token');
-  const tokenValido = token !== null && token !== 'null' && token !== 'undefined' && token.split('.').length === 3;
+  const authService = inject(AuthService);
+  const router = inject(Router);
 
-  const esRutaPublica = RUTAS_PUBLICAS.some(ruta => req.url.includes(ruta));
-
-  if (esRutaPublica) {
-    // Eliminar cualquier header de autorización en rutas públicas
-    const reqLimpio = req.clone({
-      headers: req.headers.delete('Authorization')
-    });
-    return next(reqLimpio);
+  if (!authService.isAuthenticated()) {
+    return next(req);
   }
 
-  if (tokenValido) {
-    const peticionAutenticada = req.clone({
-      setHeaders: { Authorization: `Bearer ${token}` }
-    });
-    return next(peticionAutenticada);
+  const token = authService.getToken();
+
+  if (!token || token === 'null' || token === 'undefined' || token.split('.').length !== 3) {
+    return next(req);
   }
 
-  // Sin token válido — eliminar cualquier header de autorización
-  const reqLimpio = req.clone({
-    headers: req.headers.delete('Authorization')
+  const authReq = req.clone({
+    setHeaders: {
+      Authorization: `Bearer ${token}`
+    }
   });
-  return next(reqLimpio);
+
+  return next(authReq).pipe(
+    catchError(error => {
+      if (error.status === 401) {
+        authService.logout();
+        router.navigate(['/login']);
+      }
+      return throwError(() => error);
+    })
+  );
 };

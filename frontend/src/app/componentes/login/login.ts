@@ -52,13 +52,19 @@ export class Login {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (response) => {
-          localStorage.setItem('token', response.token);
-          localStorage.setItem('refreshToken', response.refreshToken);
-          localStorage.setItem('roles', JSON.stringify(response.roles));
-          this.authService.isAuthenticated.set(true);
-          this.isLoading.set(false);
-          this.router.navigate(['/dashboard']);
-        },
+  localStorage.setItem('token', response.token);
+  localStorage.setItem('refreshToken', response.refreshToken);
+  localStorage.setItem('roles', JSON.stringify(response.roles));
+  this.authService.isAuthenticated.set(true);
+  this.isLoading.set(false);
+
+  const roles = response.roles;
+  if (roles.includes('ADMIN') || roles.includes('ADMINISTRATIVO')) {
+    this.router.navigate(['/dashboard']);
+  } else {
+    this.router.navigate(['/mis-solicitudes']);
+  }
+},
         error: () => {
           this.isLoading.set(false);
           this.result.set('Credenciales inválidas. Verifica tu correo y contraseña.');
