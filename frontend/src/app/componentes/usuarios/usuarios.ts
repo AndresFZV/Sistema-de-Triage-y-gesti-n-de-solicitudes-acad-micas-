@@ -1,8 +1,7 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
-import { AuthService } from '../../servicios/auth.service';
-
+import { NotificacionService } from '../../servicios/notificacion.services';
 @Component({
   selector: 'app-usuarios',
   imports: [FormsModule],
@@ -12,11 +11,10 @@ import { AuthService } from '../../servicios/auth.service';
 export class Usuarios implements OnInit {
 
   private http = inject(HttpClient);
-  private authService = inject(AuthService);
+  private notificacion = inject(NotificacionService);
 
   usuarios = signal<any[]>([]);
   cargando = signal(true);
-  mensaje = signal('');
   error = signal('');
 
   mostrarFormulario = signal(false);
@@ -51,7 +49,6 @@ export class Usuarios implements OnInit {
     this.formulario = { nombre: '', email: '', tipoUsuario: 'ESTUDIANTE', password: '' };
     this.modoEdicion.set(false);
     this.mostrarFormulario.set(true);
-    this.mensaje.set('');
   }
 
   abrirFormularioEditar(usuario: any): void {
@@ -64,12 +61,10 @@ export class Usuarios implements OnInit {
     this.usuarioEditandoId.set(usuario.id);
     this.modoEdicion.set(true);
     this.mostrarFormulario.set(true);
-    this.mensaje.set('');
   }
 
   cancelar(): void {
     this.mostrarFormulario.set(false);
-    this.mensaje.set('');
   }
 
   guardar(): void {
@@ -83,21 +78,21 @@ export class Usuarios implements OnInit {
         }
       ).subscribe({
         next: () => {
-          this.mensaje.set('Usuario actualizado correctamente.');
+          this.notificacion.exito('Usuario actualizado correctamente.');
           this.mostrarFormulario.set(false);
           this.cargarUsuarios();
         },
-        error: () => this.mensaje.set('Error al actualizar el usuario.')
+        error: () => this.notificacion.error('Error al actualizar el usuario.')
       });
     } else {
       this.http.post<any>('http://localhost:8080/api/usuarios', this.formulario)
         .subscribe({
           next: () => {
-            this.mensaje.set('Usuario creado correctamente.');
+            this.notificacion.exito('Usuario creado correctamente.');
             this.mostrarFormulario.set(false);
             this.cargarUsuarios();
           },
-          error: () => this.mensaje.set('Error al crear el usuario.')
+          error: () => this.notificacion.error('Error al crear el usuario.')
         });
     }
   }
@@ -106,10 +101,10 @@ export class Usuarios implements OnInit {
     if (!confirm('¿Estás seguro de eliminar este usuario?')) return;
     this.http.delete(`http://localhost:8080/api/usuarios/${id}`).subscribe({
       next: () => {
-        this.mensaje.set('Usuario eliminado correctamente.');
+        this.notificacion.exito('Usuario eliminado correctamente.');
         this.cargarUsuarios();
       },
-      error: () => this.mensaje.set('Error al eliminar el usuario.')
+      error: () => this.notificacion.error('Error al eliminar el usuario.')
     });
   }
 

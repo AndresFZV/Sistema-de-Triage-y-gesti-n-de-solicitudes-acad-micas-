@@ -13,7 +13,7 @@ import { Select } from 'primeng/select';
 
 @Component({
   selector: 'app-registro',
-  imports: [FormsModule, RouterLink, InputText, Password, Button, Message, IftaLabel, Fluid, Card, Select],
+  imports: [FormsModule, RouterLink, InputText, Password, Button, Message, IftaLabel, Fluid, Card],
   templateUrl: './registro.html',
   styleUrl: './registro.css'
 })

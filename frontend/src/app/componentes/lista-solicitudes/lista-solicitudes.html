@@ -9,11 +9,55 @@
     </a>
   </div>
 
+  @if (esAdmin || esAdministrativo) {
+    <div class="card shadow-sm mb-4">
+      <div class="card-body">
+        <div class="row g-3 align-items-end">
+          <div class="col-md-3">
+            <label class="form-label small fw-semibold">Estado</label>
+            <select class="form-select form-select-sm" [(ngModel)]="filtroEstado" (change)="aplicarFiltros()">
+              <option value="">Todos</option>
+              @for (estado of estados; track estado) {
+                <option [value]="estado">{{ estado }}</option>
+              }
+            </select>
+          </div>
+          <div class="col-md-3">
+            <label class="form-label small fw-semibold">Tipo</label>
+            <select class="form-select form-select-sm" [(ngModel)]="filtroTipo" (change)="aplicarFiltros()">
+              <option value="">Todos</option>
+              @for (tipo of tipos; track tipo) {
+                <option [value]="tipo">{{ tipo }}</option>
+              }
+            </select>
+          </div>
+          <div class="col-md-3">
+            <label class="form-label small fw-semibold">Prioridad</label>
+            <select class="form-select form-select-sm" [(ngModel)]="filtroPrioridad" (change)="aplicarFiltros()">
+              <option value="">Todas</option>
+              @for (prioridad of prioridades; track prioridad) {
+                <option [value]="prioridad">{{ prioridad }}</option>
+              }
+            </select>
+          </div>
+          <div class="col-md-3">
+            <button class="btn btn-outline-secondary btn-sm w-100" (click)="limpiarFiltros()">
+              <i class="pi pi-filter-slash me-1"></i>Limpiar filtros
+            </button>
+          </div>
+        </div>
+        <small class="text-muted mt-2 d-block">
+          Mostrando {{ solicitudesFiltradas().length }} de {{ solicitudes().length }} solicitudes
+        </small>
+      </div>
+    </div>
+  }
+
   @if (cargando()) {
     <div class="text-center py-5">
       <div class="spinner-border text-primary"></div>
     </div>
-  } @else if (solicitudes().length === 0) {
+  } @else if (solicitudesFiltradas().length === 0) {
     <div class="text-center py-5 text-muted">
       <i class="pi pi-inbox" style="font-size: 3rem"></i>
       <p class="h5 mt-3">No hay solicitudes registradas.</p>
@@ -23,7 +67,7 @@
     </div>
   } @else {
     <div class="row g-3">
-      @for (solicitud of solicitudes(); track solicitud.codigo) {
+      @for (solicitud of solicitudesFiltradas(); track solicitud.codigo) {
         <div class="col-md-6 col-lg-4">
           <div class="card h-100">
             <div class="card-header d-flex justify-content-between align-items-center">
@@ -33,7 +77,7 @@
             </div>
             <div class="card-body">
               <p class="text-muted small mb-1">
-                <i class="pi pi-tag me-1"></i>{{ solicitud.tipoSolicitud ?? 'Sin clasificar' }}
+                <i class="pi pi-tag me-1"></i>{{ solicitud.tipoSolicitud || 'Sin clasificar' }}
               </p>
               <p class="text-muted small mb-1">
                 <i class="pi pi-align-left me-1"></i>{{ solicitud.descripcion }}
@@ -60,7 +104,7 @@
                 }
               </div>
               <div class="d-flex align-items-center gap-2">
-                <small class="text-muted">{{ solicitud.solicitante?.nombre }}</small>
+                <small class="text-muted">{{ solicitud.solicitante.nombre }}</small>
                 <a [routerLink]="['/solicitudes', solicitud.codigo]"
                    class="btn btn-outline-primary btn-sm">
                   <i class="pi pi-eye"></i>

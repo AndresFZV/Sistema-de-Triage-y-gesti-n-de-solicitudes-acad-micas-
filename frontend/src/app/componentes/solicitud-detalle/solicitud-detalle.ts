@@ -1,13 +1,14 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { SlicePipe } from '@angular/common';
 import { AuthService } from '../../servicios/auth.service';
 import { FormsModule } from '@angular/forms';
+import { NotificacionService } from '../../servicios/notificacion.services';
 
 @Component({
   selector: 'app-solicitud-detalle',
-  imports: [RouterLink, SlicePipe, FormsModule],
+  imports: [SlicePipe, FormsModule],
   templateUrl: './solicitud-detalle.html',
   styleUrl: './solicitud-detalle.css'
 })
@@ -17,13 +18,13 @@ export class SolicitudDetalle implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private authService = inject(AuthService);
+  private notificacion = inject(NotificacionService);
 
   solicitud = signal<any>(null);
   historial = signal<any[]>([]);
   admins = signal<any[]>([]);
   cargando = signal(true);
   error = signal('');
-  mensaje = signal('');
 
   esAdmin = this.authService.esAdmin();
   esAdministrativo = this.authService.esAdministrativo();
@@ -93,10 +94,10 @@ export class SolicitudDetalle implements OnInit {
     }).subscribe({
       next: (data) => {
         this.solicitud.set(data);
-        this.mensaje.set('Solicitud clasificada correctamente.');
+        this.notificacion.exito('Solicitud clasificada correctamente.');
         this.cargarHistorial(codigo);
       },
-      error: () => this.mensaje.set('Error al clasificar la solicitud.')
+      error: () => this.notificacion.error('Error al clasificar la solicitud.')
     });
   }
 
@@ -107,10 +108,10 @@ export class SolicitudDetalle implements OnInit {
     }).subscribe({
       next: (data) => {
         this.solicitud.set(data);
-        this.mensaje.set('Solicitud puesta en revisión.');
+        this.notificacion.exito('Solicitud puesta en revisión.');
         this.cargarHistorial(codigo);
       },
-      error: () => this.mensaje.set('Error al poner en revisión.')
+      error: () => this.notificacion.error('Error al poner en revisión.')
     });
   }
 
@@ -121,10 +122,10 @@ export class SolicitudDetalle implements OnInit {
     }).subscribe({
       next: (data) => {
         this.solicitud.set(data);
-        this.mensaje.set('Solicitud atendida correctamente.');
+        this.notificacion.exito('Solicitud atendida correctamente.');
         this.cargarHistorial(codigo);
       },
-      error: () => this.mensaje.set('Error al atender la solicitud.')
+      error: () => this.notificacion.error('Error al atender la solicitud.')
     });
   }
 
@@ -135,10 +136,10 @@ export class SolicitudDetalle implements OnInit {
     }).subscribe({
       next: (data) => {
         this.solicitud.set(data);
-        this.mensaje.set('Solicitud rechazada.');
+        this.notificacion.advertencia('Solicitud rechazada.');
         this.cargarHistorial(codigo);
       },
-      error: () => this.mensaje.set('Error al rechazar la solicitud.')
+      error: () => this.notificacion.error('Error al rechazar la solicitud.')
     });
   }
 
@@ -149,10 +150,10 @@ export class SolicitudDetalle implements OnInit {
     }).subscribe({
       next: (data) => {
         this.solicitud.set(data);
-        this.mensaje.set('Solicitud cerrada.');
+        this.notificacion.info('Solicitud cerrada.');
         this.cargarHistorial(codigo);
       },
-      error: () => this.mensaje.set('Error al cerrar la solicitud.')
+      error: () => this.notificacion.error('Error al cerrar la solicitud.')
     });
   }
 
@@ -164,10 +165,10 @@ export class SolicitudDetalle implements OnInit {
     }).subscribe({
       next: (data) => {
         this.solicitud.set(data);
-        this.mensaje.set('Solicitud cancelada.');
+        this.notificacion.advertencia('Solicitud cancelada.');
         this.cargarHistorial(codigo);
       },
-      error: () => this.mensaje.set('Error al cancelar la solicitud.')
+      error: () => this.notificacion.error('Error al cancelar la solicitud.')
     });
   }
 

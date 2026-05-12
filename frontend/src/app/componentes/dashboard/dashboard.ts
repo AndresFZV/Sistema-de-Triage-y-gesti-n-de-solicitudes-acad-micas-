@@ -4,7 +4,7 @@ import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [RouterLink],
+  imports: [],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css'
 })
