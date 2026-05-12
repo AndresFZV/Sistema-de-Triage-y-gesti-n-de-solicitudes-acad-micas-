@@ -47,10 +47,10 @@
       <div class="d-flex gap-2 align-items-center">
         @if (isLoggedIn()) {
           @if (nombreUsuario()) {
-            <span class="navbar-text me-2">
+            <a routerLink="/perfil" class="navbar-text me-2 text-decoration-none">
               <i class="fa-solid fa-circle-user me-1"></i>
               {{ nombreUsuario() }}
-            </span>
+            </a>
           }
           <button class="btn btn-outline-danger btn-sm" (click)="cerrarSesion()">
             <i class="fa-solid fa-right-from-bracket me-1"></i>Cerrar Sesión

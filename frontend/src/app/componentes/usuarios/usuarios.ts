@@ -2,6 +2,8 @@ import { Component, inject, signal, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { NotificacionService } from '../../servicios/notificacion.services';
+import { ConfirmationService } from 'primeng/api';
+
 @Component({
   selector: 'app-usuarios',
   imports: [FormsModule],
@@ -12,6 +14,7 @@ export class Usuarios implements OnInit {
 
   private http = inject(HttpClient);
   private notificacion = inject(NotificacionService);
+  private confirmacion = inject(ConfirmationService);
 
   usuarios = signal<any[]>([]);
   cargando = signal(true);
@@ -97,14 +100,23 @@ export class Usuarios implements OnInit {
     }
   }
 
-  eliminar(id: string): void {
-    if (!confirm('¿Estás seguro de eliminar este usuario?')) return;
-    this.http.delete(`http://localhost:8080/api/usuarios/${id}`).subscribe({
-      next: () => {
-        this.notificacion.exito('Usuario eliminado correctamente.');
-        this.cargarUsuarios();
-      },
-      error: () => this.notificacion.error('Error al eliminar el usuario.')
+  eliminar(id: string, nombre: string): void {
+    this.confirmacion.confirm({
+      message: `¿Estás seguro de eliminar al usuario <strong>${nombre}</strong>? Esta acción no se puede deshacer.`,
+      header: 'Confirmar eliminación',
+      icon: 'fa-solid fa-triangle-exclamation',
+      acceptLabel: 'Sí, eliminar',
+      rejectLabel: 'Cancelar',
+      acceptButtonStyleClass: 'p-button-danger',
+      accept: () => {
+        this.http.delete(`http://localhost:8080/api/usuarios/${id}`).subscribe({
+          next: () => {
+            this.notificacion.exito('Usuario eliminado correctamente.');
+            this.cargarUsuarios();
+          },
+          error: () => this.notificacion.error('Error al eliminar el usuario.')
+        });
+      }
     });
   }
 

@@ -1,59 +1,74 @@
-<div class="contenido">
-  <h2>Dashboard</h2>
+<div class="container mt-4">
+  <h1 class="h3 mb-4">
+    <i class="fa-solid fa-chart-line me-2"></i>Dashboard
+  </h1>
 
   @if (cargando()) {
-    <div class="cargando">Cargando datos...</div>
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary"></div>
+    </div>
   }
 
-  @if (error()) {
-    <div class="error">{{ error() }}</div>
-  }
-
-  @if (dashboard()) {
-    <div class="tarjetas">
-      <div class="tarjeta total">
-        <span class="numero">{{ dashboard().totalSolicitudes }}</span>
-        <span class="label">Total</span>
+  @if (stats()) {
+    <div class="row g-3 mb-4">
+      <div class="col-md-3">
+        <div class="card text-center shadow-sm border-primary">
+          <div class="card-body">
+            <i class="fa-solid fa-file-alt fa-2x text-primary mb-2"></i>
+            <h3 class="h4">{{ stats().totalSolicitudes ?? 0 }}</h3>
+            <p class="text-muted mb-0 small">Total Solicitudes</p>
+          </div>
+        </div>
       </div>
-      <div class="tarjeta pendiente">
-        <span class="numero">{{ dashboard().pendientes }}</span>
-        <span class="label">Pendientes</span>
+      <div class="col-md-3">
+        <div class="card text-center shadow-sm border-warning">
+          <div class="card-body">
+            <i class="fa-solid fa-clock fa-2x text-warning mb-2"></i>
+            <h3 class="h4">{{ stats().pendientes ?? 0 }}</h3>
+            <p class="text-muted mb-0 small">Pendientes</p>
+          </div>
+        </div>
       </div>
-      <div class="tarjeta proceso">
-        <span class="numero">{{ dashboard().enProceso }}</span>
-        <span class="label">En Proceso</span>
+      <div class="col-md-3">
+        <div class="card text-center shadow-sm border-info">
+          <div class="card-body">
+            <i class="fa-solid fa-spinner fa-2x text-info mb-2"></i>
+            <h3 class="h4">{{ stats().enProceso ?? 0 }}</h3>
+            <p class="text-muted mb-0 small">En Proceso</p>
+          </div>
+        </div>
       </div>
-      <div class="tarjeta atendida">
-        <span class="numero">{{ dashboard().atendidas }}</span>
-        <span class="label">Atendidas</span>
-      </div>
-      <div class="tarjeta rechazada">
-        <span class="numero">{{ dashboard().rechazadas }}</span>
-        <span class="label">Rechazadas</span>
-      </div>
-      <div class="tarjeta cerrada">
-        <span class="numero">{{ dashboard().cerradas }}</span>
-        <span class="label">Cerradas</span>
-      </div>
-      <div class="tarjeta cancelada">
-        <span class="numero">{{ dashboard().canceladas }}</span>
-        <span class="label">Canceladas</span>
-      </div>
-      <div class="tarjeta sin-responsable">
-        <span class="numero">{{ dashboard().sinResponsable }}</span>
-        <span class="label">Sin Responsable</span>
+      <div class="col-md-3">
+        <div class="card text-center shadow-sm border-danger">
+          <div class="card-body">
+            <i class="fa-solid fa-triangle-exclamation fa-2x text-danger mb-2"></i>
+            <h3 class="h4">{{ pendientesSinAsignar() }}</h3>
+            <p class="text-muted mb-0 small">Sin Asignar</p>
+          </div>
+        </div>
       </div>
     </div>
 
-    <div class="reporte">
-      <h3>Solicitudes por Tipo</h3>
-      <div class="tipos">
-        @for (entry of objectEntries(dashboard().porTipo); track entry[0]) {
-          <div class="tipo-item">
-            <span class="tipo-nombre">{{ entry[0] }}</span>
-            <span class="tipo-valor">{{ entry[1] }}</span>
+    <div class="row g-4">
+      <div class="col-md-6">
+        <div class="card shadow-sm">
+          <div class="card-header fw-semibold">
+            <i class="fa-solid fa-chart-pie me-2"></i>Solicitudes por Estado
           </div>
-        }
+          <div class="card-body">
+            <p-chart type="pie" [data]="dataEstados" [options]="opciones" />
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="card shadow-sm">
+          <div class="card-header fw-semibold">
+            <i class="fa-solid fa-chart-bar me-2"></i>Solicitudes por Tipo
+          </div>
+          <div class="card-body">
+            <p-chart type="bar" [data]="dataTipos" [options]="opciones" />
+          </div>
+        </div>
       </div>
     </div>
   }

@@ -5,6 +5,7 @@ import { SlicePipe } from '@angular/common';
 import { AuthService } from '../../servicios/auth.service';
 import { FormsModule } from '@angular/forms';
 import { NotificacionService } from '../../servicios/notificacion.services';
+import { ConfirmationService } from 'primeng/api';
 
 @Component({
   selector: 'app-solicitud-detalle',
@@ -19,6 +20,7 @@ export class SolicitudDetalle implements OnInit {
   private router = inject(Router);
   private authService = inject(AuthService);
   private notificacion = inject(NotificacionService);
+  private confirmacion = inject(ConfirmationService);
 
   solicitud = signal<any>(null);
   historial = signal<any[]>([]);
@@ -33,6 +35,8 @@ export class SolicitudDetalle implements OnInit {
   adminId = signal('');
   responsableSeleccionado = '';
   tipoSolicitud = '';
+  tipoSugeridoIA = signal('');
+  cargandoSugerencia = signal(false);
 
   ngOnInit(): void {
     const codigo = this.route.snapshot.paramMap.get('codigo');
@@ -66,19 +70,40 @@ export class SolicitudDetalle implements OnInit {
     }
   }
 
-  cargarSolicitud(codigo: string): void {
-    this.http.get<any>(`http://localhost:8080/api/solicitudes/${codigo}`)
-      .subscribe({
-        next: (data) => {
-          this.solicitud.set(data);
-          this.cargando.set(false);
-        },
-        error: () => {
-          this.error.set('Error al cargar la solicitud.');
-          this.cargando.set(false);
+cargarSolicitud(codigo: string): void {
+  this.http.get<any>(`http://localhost:8080/api/solicitudes/${codigo}`)
+    .subscribe({
+      next: (data) => {
+        this.solicitud.set(data);
+        this.cargando.set(false);
+        // Si es admin y la solicitud está en clasificación, sugerir tipo automáticamente
+        if ((this.esAdmin || this.esAdministrativo) && data.estado === 'CLASIFICACION') {
+          this.sugerirTipoConIA(data.descripcion);
         }
-      });
-  }
+      },
+      error: () => {
+        this.error.set('Error al cargar la solicitud.');
+        this.cargando.set(false);
+      }
+    });
+}
+
+sugerirTipoConIA(descripcion: string): void {
+  this.cargandoSugerencia.set(true);
+  this.http.post<any>('http://localhost:8080/api/ia/sugerir-tipo', { descripcion })
+    .subscribe({
+      next: (res) => {
+        this.tipoSugeridoIA.set(res.tipoSugerido);
+        this.cargandoResumen.set(false);
+        // Preseleccionar el tipo sugerido en el select
+        if (res.tipoSugerido) {
+          this.tipoSolicitud = res.tipoSugerido;
+        }
+        this.cargandoSugerencia.set(false);
+      },
+      error: () => this.cargandoSugerencia.set(false)
+    });
+}
 
   cargarHistorial(codigo: string): void {
     this.http.get<any[]>(`http://localhost:8080/api/solicitudes/${codigo}/historial`)
@@ -177,20 +202,30 @@ export class SolicitudDetalle implements OnInit {
     });
   }
 
-  cancelar(): void {
-    const codigo = this.solicitud()?.codigo;
-    const solicitanteId = this.solicitud()?.solicitante?.id;
-    this.http.patch<any>(`http://localhost:8080/api/solicitudes/${codigo}/cancelar`, {
-      solicitanteId
-    }).subscribe({
-      next: (data) => {
-        this.solicitud.set(data);
-        this.notificacion.advertencia('Solicitud cancelada.');
-        this.cargarHistorial(codigo);
-      },
-      error: () => this.notificacion.error('Error al cancelar la solicitud.')
-    });
-  }
+cancelar(): void {
+  this.confirmacion.confirm({
+    message: '¿Estás seguro de cancelar esta solicitud? Esta acción no se puede deshacer.',
+    header: 'Confirmar cancelación',
+    icon: 'fa-solid fa-triangle-exclamation',
+    acceptLabel: 'Sí, cancelar',
+    rejectLabel: 'No',
+    acceptButtonStyleClass: 'p-button-danger',
+    accept: () => {
+      const codigo = this.solicitud()?.codigo;
+      const solicitanteId = this.solicitud()?.solicitante?.id;
+      this.http.patch<any>(`http://localhost:8080/api/solicitudes/${codigo}/cancelar`, {
+        solicitanteId
+      }).subscribe({
+        next: (data) => {
+          this.solicitud.set(data);
+          this.notificacion.advertencia('Solicitud cancelada.');
+          this.cargarHistorial(codigo);
+        },
+        error: () => this.notificacion.error('Error al cancelar la solicitud.')
+      });
+    }
+  });
+}
 
   badgeEstado(estado: string): string {
     const mapa: Record<string, string> = {

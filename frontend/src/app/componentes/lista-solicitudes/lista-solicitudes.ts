@@ -26,14 +26,46 @@ export class ListaSolicitudes implements OnInit {
   solicitudes = signal<SolicitudResumen[]>([]);
   solicitudesFiltradas = signal<SolicitudResumen[]>([]);
   cargando = signal(true);
+  paginaActual = signal(0);
+  tamañoPagina = 9;
 
   filtroEstado = '';
   filtroTipo = '';
   filtroPrioridad = '';
+  filtroBusqueda = '';
 
   estados = ['CLASIFICACION', 'PENDIENTE', 'EN_PROCESO', 'ATENDIDA', 'RECHAZADA', 'CERRADA', 'CANCELADA'];
   tipos = ['HOMOLOGACION', 'CANCELACION', 'SOLICITUD_CUPO', 'OTRO'];
   prioridades = ['ALTA', 'MEDIA', 'BAJA'];
+
+  get solicitudesPaginadas(): SolicitudResumen[] {
+    const inicio = this.paginaActual() * this.tamañoPagina;
+    return this.solicitudesFiltradas().slice(inicio, inicio + this.tamañoPagina);
+  }
+
+  get totalPaginas(): number {
+    return Math.ceil(this.solicitudesFiltradas().length / this.tamañoPagina);
+  }
+
+  get paginas(): number[] {
+    return Array.from({ length: this.totalPaginas }, (_, i) => i);
+  }
+
+  irAPagina(pagina: number): void {
+    this.paginaActual.set(pagina);
+  }
+
+  paginaAnterior(): void {
+    if (this.paginaActual() > 0) {
+      this.paginaActual.set(this.paginaActual() - 1);
+    }
+  }
+
+  paginaSiguiente(): void {
+    if (this.paginaActual() < this.totalPaginas - 1) {
+      this.paginaActual.set(this.paginaActual() + 1);
+    }
+  }
 
   ngOnInit(): void {
     if (this.esAdmin || this.esAdministrativo) {
@@ -67,6 +99,7 @@ export class ListaSolicitudes implements OnInit {
   }
 
   aplicarFiltros(): void {
+    this.paginaActual.set(0);
     let resultado = this.solicitudes();
 
     if (this.filtroEstado) {
@@ -78,6 +111,14 @@ export class ListaSolicitudes implements OnInit {
     if (this.filtroPrioridad) {
       resultado = resultado.filter(s => s.prioridad === this.filtroPrioridad);
     }
+    if (this.filtroBusqueda.trim()) {
+      const busqueda = this.filtroBusqueda.trim().toLowerCase();
+      resultado = resultado.filter(s =>
+        s.codigo.toLowerCase().includes(busqueda) ||
+        s.descripcion.toLowerCase().includes(busqueda) ||
+        s.solicitante.nombre.toLowerCase().includes(busqueda)
+      );
+    }
 
     this.solicitudesFiltradas.set(resultado);
   }
@@ -86,6 +127,8 @@ export class ListaSolicitudes implements OnInit {
     this.filtroEstado = '';
     this.filtroTipo = '';
     this.filtroPrioridad = '';
+    this.filtroBusqueda = '';
+    this.paginaActual.set(0);
     this.solicitudesFiltradas.set(this.solicitudes());
   }
 

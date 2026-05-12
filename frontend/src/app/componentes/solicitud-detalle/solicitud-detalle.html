@@ -75,23 +75,38 @@
                 </div>
               }
 
-              @if (solicitud().estado === 'CLASIFICACION') {
-                <div class="mb-3">
-                  <label class="form-label">Tipo de solicitud</label>
-                  <select class="form-select" [(ngModel)]="tipoSolicitud">
-                    <option value="">Selecciona un tipo</option>
-                    <option value="HOMOLOGACION">Homologación</option>
-                    <option value="CANCELACION">Cancelación</option>
-                    <option value="SOLICITUD_CUPO">Solicitud de Cupo</option>
-                    <option value="OTRO">Otro</option>
-                  </select>
-                </div>
-                <button class="btn btn-primary me-2"
-                  [disabled]="!adminId() || !tipoSolicitud"
-                  (click)="clasificar()">
-                  <i class="fa-solid fa-tags me-1"></i>Clasificar
-                </button>
-              }
+             @if (solicitud().estado === 'CLASIFICACION') {
+  @if (cargandoSugerencia()) {
+    <div class="alert alert-secondary small py-2 mb-3">
+      <span class="spinner-border spinner-border-sm me-1"></span>
+      Analizando solicitud con IA...
+    </div>
+  }
+
+  @if (tipoSugeridoIA()) {
+    <div class="alert alert-info small py-2 mb-3">
+      <i class="fa-solid fa-robot me-1"></i>
+      <strong>IA sugiere:</strong> {{ tipoSugeridoIA() }} —
+      <span class="text-muted">preseleccionado automáticamente, puedes cambiarlo.</span>
+    </div>
+  }
+
+  <div class="mb-3">
+    <label class="form-label">Tipo de solicitud</label>
+    <select class="form-select" [(ngModel)]="tipoSolicitud">
+      <option value="">Selecciona un tipo</option>
+      <option value="HOMOLOGACION">Homologación</option>
+      <option value="CANCELACION">Cancelación</option>
+      <option value="SOLICITUD_CUPO">Solicitud de Cupo</option>
+      <option value="OTRO">Otro</option>
+    </select>
+  </div>
+  <button class="btn btn-primary me-2"
+    [disabled]="!adminId() || !tipoSolicitud"
+    (click)="clasificar()">
+    <i class="fa-solid fa-tags me-1"></i>Clasificar
+  </button>
+}
 
               @if (solicitud().estado === 'PENDIENTE') {
                 <div class="mb-3">

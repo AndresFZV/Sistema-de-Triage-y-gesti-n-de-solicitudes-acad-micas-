@@ -7,9 +7,11 @@ import { NuevaSolicitud } from './componentes/nueva-solicitud/nueva-solicitud';
 import { SolicitudDetalle } from './componentes/solicitud-detalle/solicitud-detalle';
 import { Usuarios } from './componentes/usuarios/usuarios';
 import { Unauthorized } from './componentes/unauthorized/unauthorized';
+import { Perfil } from './componentes/perfil/perfil';
 import { authGuard, adminGuard } from './guards/auth.guard';
 import { publicGuard } from './guards/public-guard';
 import { rolesGuard } from './guards/roles-guard';
+
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
   { path: 'login', component: Login, canActivate: [publicGuard] },
@@ -47,6 +49,7 @@ export const routes: Routes = [
     canActivate: [rolesGuard],
     data: { expectedRoles: ['ADMIN', 'ADMINISTRATIVO'] }
   },
+  { path: 'perfil', component: Perfil, canActivate: [authGuard] },
   { path: 'unauthorized', component: Unauthorized },
   { path: '**', redirectTo: 'login' }
 ];

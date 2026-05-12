@@ -45,9 +45,22 @@
               <i class="pi pi-filter-slash me-1"></i>Limpiar filtros
             </button>
           </div>
+          <div class="col-12">
+            <label class="form-label small fw-semibold">Buscar</label>
+            <div class="input-group input-group-sm">
+              <span class="input-group-text">
+                <i class="fa-solid fa-magnifying-glass"></i>
+              </span>
+              <input type="text" class="form-control"
+                placeholder="Buscar por código, descripción o solicitante..."
+                [(ngModel)]="filtroBusqueda"
+                (input)="aplicarFiltros()" />
+            </div>
+          </div>
         </div>
         <small class="text-muted mt-2 d-block">
-          Mostrando {{ solicitudesFiltradas().length }} de {{ solicitudes().length }} solicitudes
+          Mostrando {{ solicitudesPaginadas.length }} de {{ solicitudesFiltradas().length }} solicitudes
+          (página {{ paginaActual() + 1 }} de {{ totalPaginas || 1 }})
         </small>
       </div>
     </div>
@@ -67,7 +80,7 @@
     </div>
   } @else {
     <div class="row g-3">
-      @for (solicitud of solicitudesFiltradas(); track solicitud.codigo) {
+      @for (solicitud of solicitudesPaginadas; track solicitud.codigo) {
         <div class="col-md-6 col-lg-4">
           <div class="card h-100">
             <div class="card-header d-flex justify-content-between align-items-center">
@@ -115,5 +128,29 @@
         </div>
       }
     </div>
+
+    @if (totalPaginas > 1) {
+      <nav class="mt-4">
+        <ul class="pagination justify-content-center">
+          <li class="page-item" [class.disabled]="paginaActual() === 0">
+            <button class="page-link" (click)="paginaAnterior()">
+              <i class="fa-solid fa-chevron-left"></i>
+            </button>
+          </li>
+          @for (pagina of paginas; track pagina) {
+            <li class="page-item" [class.active]="paginaActual() === pagina">
+              <button class="page-link" (click)="irAPagina(pagina)">
+                {{ pagina + 1 }}
+              </button>
+            </li>
+          }
+          <li class="page-item" [class.disabled]="paginaActual() === totalPaginas - 1">
+            <button class="page-link" (click)="paginaSiguiente()">
+              <i class="fa-solid fa-chevron-right"></i>
+            </button>
+          </li>
+        </ul>
+      </nav>
+    }
   }
 </div>

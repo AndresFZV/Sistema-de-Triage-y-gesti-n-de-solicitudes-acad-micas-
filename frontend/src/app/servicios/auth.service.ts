@@ -32,6 +32,13 @@ export class AuthService {
     this.isAuthenticated.set(true);
   }
 
+  renovarToken(refreshToken: string): Observable<TokenResponse> {
+    return this.http.post<TokenResponse>(
+      `${this.apiUrl}/refresh`,
+      { refreshToken }
+    );
+  }
+
   obtenerToken(): string | null {
     return localStorage.getItem('token');
   }
@@ -40,55 +47,43 @@ export class AuthService {
     return localStorage.getItem('token');
   }
 
-obtenerRoles(): string[] {
-  const roles = localStorage.getItem('roles');
-  return roles ? JSON.parse(roles) : [];
-}
-
-esAdmin(): boolean {
-  return this.obtenerRoles().includes('ADMIN');
-}
-
-esAdministrativo(): boolean {
-  return this.obtenerRoles().includes('ADMINISTRATIVO');
-}
-
-esEstudiante(): boolean {
-  return this.obtenerRoles().includes('ESTUDIANTE');
-}
-
-esDocente(): boolean {
-  return this.obtenerRoles().includes('DOCENTE');
-}
-
-obtenerIdUsuario(): string | null {
-  return localStorage.getItem('userId');
-}
-
-obtenerIdDesdeToken(): string | null {
-  const token = localStorage.getItem('token');
-  if (!token) return null;
-  try {
-    const payload = JSON.parse(atob(token.split('.')[1]));
-    return payload.sub; // 'sub' es el email del usuario
-  } catch {
-    return null;
+  obtenerRoles(): string[] {
+    const roles = localStorage.getItem('roles');
+    return roles ? JSON.parse(roles) : [];
   }
-}
 
-obtenerEmailDesdeToken(): string | null {
-  const token = localStorage.getItem('token');
-  if (!token) return null;
-  try {
-    const payload = JSON.parse(atob(token.split('.')[1]));
-    return payload.sub;
-  } catch {
-    return null;
+  esAdmin(): boolean {
+    return this.obtenerRoles().includes('ADMIN');
   }
-}
 
-cerrarSesion(): void {
-  this.logout();
-}
-  
+  esAdministrativo(): boolean {
+    return this.obtenerRoles().includes('ADMINISTRATIVO');
+  }
+
+  esEstudiante(): boolean {
+    return this.obtenerRoles().includes('ESTUDIANTE');
+  }
+
+  esDocente(): boolean {
+    return this.obtenerRoles().includes('DOCENTE');
+  }
+
+  obtenerIdUsuario(): string | null {
+    return localStorage.getItem('userId');
+  }
+
+  obtenerEmailDesdeToken(): string | null {
+    const token = localStorage.getItem('token');
+    if (!token) return null;
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      return payload.sub;
+    } catch {
+      return null;
+    }
+  }
+
+  cerrarSesion(): void {
+    this.logout();
+  }
 }
