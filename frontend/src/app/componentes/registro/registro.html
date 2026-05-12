@@ -1,60 +1,62 @@
-<div class="registro-container">
-  <div class="registro-card">
-    <h2>Sistema de Triage Académico</h2>
-    <h3>Crear Cuenta</h3>
+<div class="login-wrapper">
+  <p-card class="login-card">
+    <div class="login-header">
+      <i class="pi pi-user-plus" style="font-size: 2rem; color: var(--p-primary-color)"></i>
+      <h2 class="mt-2">Crear Cuenta</h2>
+      <p class="text-secondary">Sistema de Solicitudes UQ</p>
+    </div>
 
-    @if (error) {
-      <div class="error">{{ error }}</div>
-    }
+    <p-fluid>
+      <div class="flex flex-col gap-4">
 
-    @if (exito) {
-      <div class="exito">{{ exito }}</div>
-    }
+        @if (error) {
+          <p-message severity="error" [text]="error" />
+        }
 
-    <form (ngSubmit)="registrar()">
-      <div class="form-group">
-        <label for="nombre">Nombre completo</label>
-        <input
-          id="nombre"
-          type="text"
-          [(ngModel)]="request.nombre"
-          name="nombre"
-          placeholder="Juan Pérez"
-          required
+        @if (exito) {
+          <p-message severity="success" [text]="exito" />
+        }
+
+        <p-iftalabel>
+          <input pInputText id="nombre"
+            type="text"
+            [(ngModel)]="request.nombre"
+            name="nombre"
+            required />
+          <label for="nombre">Nombre completo</label>
+        </p-iftalabel>
+
+        <p-iftalabel>
+          <input pInputText id="email"
+            type="email"
+            [(ngModel)]="request.email"
+            name="email"
+            required />
+          <label for="email">Correo electrónico</label>
+        </p-iftalabel>
+
+        <p-iftalabel>
+          <p-password id="password"
+            [(ngModel)]="request.password"
+            name="password"
+            [feedback]="false"
+            [toggleMask]="true" />
+          <label for="password">Contraseña</label>
+        </p-iftalabel>
+
+        <p-button
+          label="Registrarse"
+          severity="primary"
+          [disabled]="cargando"
+          [loading]="cargando"
+          (onClick)="registrar()"
         />
+
+        <div class="text-center mt-2">
+          <small>¿Ya tienes cuenta? <a routerLink="/login">Inicia sesión aquí</a></small>
+        </div>
+
       </div>
-
-      <div class="form-group">
-        <label for="email">Email</label>
-        <input
-          id="email"
-          type="email"
-          [(ngModel)]="request.email"
-          name="email"
-          placeholder="juan@uniquindio.edu.co"
-          required
-        />
-      </div>
-
-      <div class="form-group">
-        <label for="password">Contraseña</label>
-        <input
-          id="password"
-          type="password"
-          [(ngModel)]="request.password"
-          name="password"
-          placeholder="Mínimo 8 caracteres"
-          required
-        />
-      </div>
-
-      <button type="submit" [disabled]="cargando">
-        {{ cargando ? 'Registrando...' : 'Registrarse' }}
-      </button>
-    </form>
-
-    <p class="login-link">
-      ¿Ya tienes cuenta? <a routerLink="/login">Inicia sesión aquí</a>
-    </p>
-  </div>
-</div><
+    </p-fluid>
+  </p-card>
+</div>

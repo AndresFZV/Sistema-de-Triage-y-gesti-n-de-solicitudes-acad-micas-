@@ -1,15 +1,16 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { SlicePipe } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
+import { Card } from 'primeng/card';
+import { Tag } from 'primeng/tag';
 import { SolicitudesService } from '../../servicios/solicitudes.service';
 import { AuthService } from '../../servicios/auth.service';
 import { SolicitudResumen } from '../../modelos/solicitudes';
 
 @Component({
   selector: 'app-lista-solicitudes',
-  imports: [RouterLink, SlicePipe],
+  imports: [RouterLink, SlicePipe, Card, Tag],
   templateUrl: './lista-solicitudes.html',
   styleUrl: './lista-solicitudes.css'
 })
@@ -25,55 +26,55 @@ export class ListaSolicitudes implements OnInit {
   solicitudes = signal<SolicitudResumen[]>([]);
   cargando = signal(true);
 
-  ngOnInit(): void {
-    if (this.esAdmin || this.esAdministrativo) {
-      this.solicitudesService.listar().subscribe({
-        next: (data) => {
-          this.solicitudes.set(data);
-          this.cargando.set(false);
-        },
-        error: () => this.cargando.set(false)
-      });
-    } else {
-      const email = this.authService.obtenerEmailDesdeToken();
-      if (email) {
-        this.http.get<any>(`http://localhost:8080/api/usuarios/buscar?email=${email}`)
-          .subscribe({
-            next: (usuario) => {
-              this.solicitudesService.listarPorUsuario(usuario.id).subscribe({
-                next: (data) => {
-                  this.solicitudes.set(data);
-                  this.cargando.set(false);
-                },
-                error: () => this.cargando.set(false)
-              });
-            },
-            error: () => this.cargando.set(false)
-          });
-      }
+ngOnInit(): void {
+  if (this.esAdmin || this.esAdministrativo) {
+    this.solicitudesService.listar().subscribe({
+      next: (data) => {
+        this.solicitudes.set(data);
+        this.cargando.set(false);
+      },
+      error: () => this.cargando.set(false)
+    });
+  } else {
+    const email = this.authService.obtenerEmailDesdeToken();
+    if (email) {
+      this.http.get<any>(`http://localhost:8080/api/usuarios/buscar?email=${email}`)
+        .subscribe({
+          next: (usuario) => {
+            this.solicitudesService.listarPorUsuario(usuario.id).subscribe({
+              next: (data) => {
+                this.solicitudes.set(data);
+                this.cargando.set(false);
+              },
+              error: () => this.cargando.set(false)
+            });
+          },
+          error: () => this.cargando.set(false)
+        });
     }
   }
+}
 
-  badgeEstado(estado: string): string {
-    const mapa: Record<string, string> = {
-      CLASIFICACION: 'bg-secondary',
-      PENDIENTE: 'bg-warning text-dark',
-      EN_PROCESO: 'bg-primary',
-      ATENDIDA: 'bg-success',
-      CERRADA: 'bg-dark',
-      CANCELADA: 'bg-danger',
-      RECHAZADA: 'bg-danger'
+  tagSeveridad(estado: string): 'success' | 'info' | 'warn' | 'danger' | 'secondary' | 'contrast' {
+    const mapa: Record<string, 'success' | 'info' | 'warn' | 'danger' | 'secondary' | 'contrast'> = {
+      CLASIFICACION: 'secondary',
+      PENDIENTE: 'warn',
+      EN_PROCESO: 'info',
+      ATENDIDA: 'success',
+      CERRADA: 'contrast',
+      CANCELADA: 'danger',
+      RECHAZADA: 'danger'
     };
-    return mapa[estado] ?? 'bg-secondary';
+    return mapa[estado] ?? 'secondary';
   }
 
-  badgePrioridad(prioridad: string): string {
-    const mapa: Record<string, string> = {
-      BAJA: 'bg-success',
-      MEDIA: 'bg-warning text-dark',
-      ALTA: 'bg-danger'
+  tagPrioridad(prioridad: string): 'success' | 'warn' | 'danger' {
+    const mapa: Record<string, 'success' | 'warn' | 'danger'> = {
+      BAJA: 'success',
+      MEDIA: 'warn',
+      ALTA: 'danger'
     };
-    return mapa[prioridad] ?? 'bg-secondary';
+    return mapa[prioridad] ?? 'success';
   }
 
   mensajeEstado(estado: string): string {

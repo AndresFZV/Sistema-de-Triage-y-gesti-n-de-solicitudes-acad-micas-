@@ -1,107 +1,39 @@
-.registro-container {
+.login-wrapper {
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 100vh;
-  background-color: #f0f2f5;
+  min-height: 80vh;
+  padding: 1rem;
 }
 
-.registro-card {
-  background: white;
-  padding: 2rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+.login-card {
   width: 100%;
-  max-width: 400px;
+  max-width: 420px;
 }
 
-h2 {
+.login-header {
   text-align: center;
-  color: #1a1a2e;
-  font-size: 1.2rem;
-  margin-bottom: 0.5rem;
-}
-
-h3 {
-  text-align: center;
-  color: #444;
-  font-size: 1rem;
   margin-bottom: 1.5rem;
-  font-weight: normal;
 }
 
-.form-group {
-  margin-bottom: 1rem;
+.login-header h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0.5rem 0 0.25rem;
 }
 
-label {
+.flex {
+  display: flex;
+}
+
+.flex-col {
+  flex-direction: column;
+}
+
+.gap-4 {
+  gap: 1.5rem;
+}
+
+:host {
   display: block;
-  margin-bottom: 0.3rem;
-  color: #555;
-  font-size: 0.9rem;
-}
-
-input, select {
-  width: 100%;
-  padding: 0.6rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 0.95rem;
-  box-sizing: border-box;
-}
-
-input:focus, select:focus {
-  outline: none;
-  border-color: #4a90e2;
-}
-
-button {
-  width: 100%;
-  padding: 0.75rem;
-  background-color: #4a90e2;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  font-size: 1rem;
-  cursor: pointer;
-  margin-top: 0.5rem;
-}
-
-button:disabled {
-  background-color: #a0c4f1;
-  cursor: not-allowed;
-}
-
-button:hover:not(:disabled) {
-  background-color: #357abd;
-}
-
-.error {
-  background-color: #ffe0e0;
-  color: #c0392b;
-  padding: 0.6rem;
-  border-radius: 4px;
-  margin-bottom: 1rem;
-  font-size: 0.9rem;
-}
-
-.exito {
-  background-color: #e0ffe0;
-  color: #27ae60;
-  padding: 0.6rem;
-  border-radius: 4px;
-  margin-bottom: 1rem;
-  font-size: 0.9rem;
-}
-
-.login-link {
-  text-align: center;
-  margin-top: 1rem;
-  font-size: 0.9rem;
-  color: #666;
-}
-
-.login-link a {
-  color: #4a90e2;
-  text-decoration: none;
 }
