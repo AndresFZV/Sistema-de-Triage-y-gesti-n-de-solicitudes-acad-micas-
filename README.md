@@ -19,21 +19,24 @@
 
 El Programa de Ingeniería de Sistemas y Computación cuenta con una comunidad de más de 1.400 estudiantes, docentes y administrativos que realizan de manera permanente diversas solicitudes académicas y administrativas (homologaciones, cancelaciones, solicitudes de cupo, entre otras) a través de múltiples canales.
 
-Este sistema resuelve la gestión ineficiente de dichas solicitudes mediante una plataforma backend 100% funcional, segura y comunicada mediante red, que permite:
+Este sistema resuelve la gestión ineficiente de dichas solicitudes mediante una plataforma fullstack funcional, segura y con integración de inteligencia artificial, que permite:
 
 - **Registrar** solicitudes de manera estructurada
-- **Clasificar y priorizar** solicitudes mediante reglas de negocio claras
-- **Asignar responsables** de forma controlada
+- **Clasificar y priorizar** solicitudes mediante reglas de negocio claras y asistencia de IA
+- **Asignar responsables** de forma controlada con selección desde un listado de administradores
 - **Gestionar el ciclo de vida completo** de cada solicitud
 - **Mantener un historial auditable** de todas las acciones realizadas
 - **Autenticar y autorizar** usuarios mediante JWT con roles granulares
-- **Consultar y filtrar** solicitudes con paginación dinámica
+- **Consultar y filtrar** solicitudes con paginación, búsqueda y filtros dinámicos
+- **Resumir y analizar** solicitudes con inteligencia artificial (Groq - LLaMA 3.3)
 
 El sistema está diseñado siguiendo los principios de **Arquitectura Hexagonal / Domain-Driven Design (DDD)**, garantizando que las reglas del negocio vivan en el dominio y que el software represente fielmente la realidad del problema.
 
 ---
 
 ## Tecnologías
+
+### Backend
 
 | Tecnología | Versión | Uso |
 |-----------|---------|-----|
@@ -46,7 +49,19 @@ El sistema está diseñado siguiendo los principios de **Arquitectura Hexagonal 
 | MapStruct | 1.6.3 | Mapeo DTO ↔ Dominio ↔ JPA |
 | Lombok | 1.18.42 | Reducción de boilerplate |
 | Springdoc OpenAPI | 3.0.2 | Documentación Swagger UI |
-| JUnit 5 | Latest | Pruebas unitarias e integración |
+| Groq API | — | Inteligencia artificial (LLaMA 3.3 70B) |
+
+### Frontend
+
+| Tecnología | Versión | Uso |
+|-----------|---------|-----|
+| Angular | 21 | Framework frontend |
+| TypeScript | 5.x | Lenguaje principal |
+| PrimeNG | 21.1.6 | Componentes UI |
+| Bootstrap | 5.3.6 | Layout y estilos base |
+| Chart.js | — | Gráficas del dashboard |
+| Font Awesome | 6.x | Iconografía |
+| PrimeIcons | — | Iconografía PrimeNG |
 
 ---
 
@@ -56,29 +71,82 @@ El sistema está diseñado siguiendo los principios de **Arquitectura Hexagonal 
 
 - Java 25 instalado
 - Maven 3.x instalado
+- Node.js 20+ instalado
+- Angular CLI 21 instalado
 
 ```bash
-java -version   # debe mostrar 25.x.x
-mvn -version    # debe mostrar 3.x.x
+java -version     # debe mostrar 25.x.x
+mvn -version      # debe mostrar 3.x.x
+node -version     # debe mostrar 20.x.x
+ng version        # debe mostrar 21.x.x
 ```
 
-### Compilar y ejecutar
+### Backend
 
 ```bash
-# Compilar
-mvn clean compile
+cd proyecto
 
-# Ejecutar
+# Configurar la API key de Groq en application.properties
+# groq.api.key=gsk_TU_API_KEY_AQUI
+
+# Compilar y ejecutar
+mvn clean compile
 mvn spring-boot:run
 ```
 
 La aplicación levanta en `http://localhost:8080`
 
-### Ejecutar pruebas
+### Frontend
+
+```bash
+cd frontend
+
+# Instalar dependencias
+npm install
+
+# Ejecutar en modo desarrollo
+npm start
+```
+
+La aplicación levanta en `http://localhost:4200`
+
+### Ejecutar pruebas (backend)
 
 ```bash
 mvn test
 ```
+
+---
+
+## Configuración de Inteligencia Artificial (RF-11)
+
+El sistema integra IA mediante la API de **Groq** con el modelo **LLaMA 3.3 70B Versatile**. La IA es un componente opcional — el sistema funciona completamente sin ella (RF-11: robustez y autonomía).
+
+### Obtener API Key de Groq
+
+1. Crear cuenta en `https://console.groq.com`
+2. Ir a **API Keys** → **Create API Key**
+3. Copiar la key (empieza con `gsk_...`)
+
+### Configurar en el backend
+
+En `src/main/resources/application.properties`:
+
+```properties
+groq.api.key=gsk_TU_API_KEY_AQUI
+groq.api.url=https://api.groq.com/openai/v1/chat/completions
+groq.model=llama-3.3-70b-versatile
+```
+
+> ⚠️ **No commitear la API key**. Agregar al `.gitignore` o usar variables de entorno.
+
+### Funcionalidades de IA
+
+| Endpoint | Descripción | Fallback si falla |
+|----------|-------------|-------------------|
+| `POST /api/ia/sugerir-tipo` | Sugiere el tipo de solicitud basado en la descripción | Retorna `OTRO` |
+| `POST /api/ia/resumir` | Genera un resumen ejecutivo de la descripción | Retorna descripción original |
+| `POST /api/ia/validar-descripcion` | Valida si la descripción es clara y suficiente | Retorna `OK` |
 
 ---
 
@@ -89,8 +157,6 @@ mvn test
 ```
 http://localhost:8080/swagger-ui.html
 ```
-
-Permite explorar y probar todos los endpoints directamente desde el navegador.
 
 ### Consola H2
 
@@ -115,12 +181,6 @@ Al iniciar la aplicación se insertan automáticamente estos usuarios de prueba:
 | `admin@solicitudes.com` | `admin123` | ADMIN | ADMINISTRATIVO |
 | `agente@solicitudes.com` | `agente123` | USER | ESTUDIANTE |
 
-Para obtener el `codigoExterno` del admin (necesario para clasificar solicitudes), conectarse a la consola H2 y ejecutar:
-
-```sql
-SELECT codigo_externo, email, tipo_usuario FROM usuarios;
-```
-
 ---
 
 ## Autenticación JWT
@@ -143,16 +203,10 @@ Respuesta:
   "token": "eyJhbGci...",
   "refreshToken": "eyJhbGci...",
   "type": "Bearer",
-  "expireAt": "2026-04-19T...",
+  "expireAt": "2026-...",
   "roles": ["ADMIN", "ADMINISTRATIVO"]
 }
 ```
-
-### Uso del token en Swagger
-
-1. Copia el valor del campo `token`
-2. Haz clic en el botón **Authorize** en la parte superior de Swagger UI
-3. Escribe `Bearer {token}` y confirma
 
 ### Refresh Token
 
@@ -174,182 +228,53 @@ Authorization: Bearer {token}
 
 ---
 
-## Guía de Inicio Rápido
+## Guía de Inicio Rápido (Backend)
 
-### Paso 1 — Hacer login y obtener el token
+### Paso 1 — Login
 
 ```http
 POST /api/auth/login
-Content-Type: application/json
-
-{
-  "username": "admin@solicitudes.com",
-  "password": "admin123"
-}
+{ "username": "admin@solicitudes.com", "password": "admin123" }
 ```
 
-Copia el `token` de la respuesta y autorízate en Swagger con `Bearer {token}`.
-
----
-
-### Paso 2 — Crear un usuario solicitante
-
-```http
-POST /api/usuarios
-Authorization: Bearer {token}
-Content-Type: application/json
-
-{
-  "nombre": "Juan Pérez",
-  "email": "juan@uniquindio.edu.co",
-  "tipoUsuario": "ESTUDIANTE",
-  "password": "mipassword123"
-}
-```
-
-Respuesta:
-```json
-{
-  "id": "43483677-e069-4c57-903a-213bfdacbcba",
-  "nombre": "Juan Pérez",
-  "email": "juan@uniquindio.edu.co",
-  "tipoUsuario": "ESTUDIANTE"
-}
-```
-
-> Copia el campo `id` — es el `codigoExterno` del usuario y lo necesitarás para crear solicitudes.
-
----
-
-### Paso 3 — Crear una solicitud
+### Paso 2 — Crear solicitud
 
 ```http
 POST /api/solicitudes
 Authorization: Bearer {token}
-Content-Type: application/json
 
 {
-  "descripcion": "Solicito homologación de la materia Cálculo I cursada en otra institución.",
-  "solicitanteId": "43483677-e069-4c57-903a-213bfdacbcba"
+  "descripcion": "Solicito homologación de Cálculo I.",
+  "solicitanteId": "uuid-del-solicitante"
 }
 ```
 
-Respuesta:
-```json
-{
-  "codigo": "SOL-1776580125237",
-  "descripcion": "Solicito homologación...",
-  "estado": "CLASIFICACION",
-  "tipoSolicitud": null,
-  "prioridad": null,
-  "fechaCreacion": "2026-04-19T...",
-  "solicitante": { ... },
-  "responsable": null
-}
-```
-
-> Copia el `codigo` — lo necesitarás para los siguientes pasos.
-
----
-
-### Paso 4 — Clasificar la solicitud
+### Paso 3 — Clasificar
 
 ```http
-PATCH /api/solicitudes/SOL-1776580125237/clasificar
-Authorization: Bearer {token}
-Content-Type: application/json
-
-{
-  "tipoSolicitud": "HOMOLOGACION",
-  "adminId": "codigoExterno-del-admin"
-}
+PATCH /api/solicitudes/{codigo}/clasificar
+{ "tipoSolicitud": "HOMOLOGACION", "adminId": "uuid-del-admin" }
 ```
 
-> El `adminId` es el `codigoExterno` del admin. Consúltalo en H2 con `SELECT * FROM USUARIOS`.
-
-La prioridad se calcula automáticamente. El estado cambia a `PENDIENTE`.
-
----
-
-### Paso 5 — Asignar responsable
+### Paso 4 — Poner en revisión
 
 ```http
-PATCH /api/solicitudes/SOL-1776580125237/revision
-Authorization: Bearer {token}
-Content-Type: application/json
-
-{
-  "responsableId": "codigoExterno-del-admin"
-}
+PATCH /api/solicitudes/{codigo}/revision
+{ "responsableId": "uuid-del-responsable" }
 ```
 
-El estado cambia a `EN_PROCESO`.
-
----
-
-### Paso 6 — Atender la solicitud
+### Paso 5 — Atender
 
 ```http
-PATCH /api/solicitudes/SOL-1776580125237/atender
-Authorization: Bearer {token}
-Content-Type: application/json
-
-{
-  "adminId": "codigoExterno-del-admin"
-}
+PATCH /api/solicitudes/{codigo}/atender
+{ "adminId": "uuid-del-admin" }
 ```
 
-El estado cambia a `ATENDIDA`.
-
----
-
-### Paso 7 — Cerrar la solicitud
+### Paso 6 — Cerrar
 
 ```http
-PATCH /api/solicitudes/SOL-1776580125237/cerrar
-Authorization: Bearer {token}
-Content-Type: application/json
-
-{
-  "adminId": "codigoExterno-del-admin"
-}
-```
-
-El estado cambia a `CERRADA`.
-
----
-
-### Paso 8 — Ver el historial
-
-```http
-GET /api/solicitudes/SOL-1776580125237/historial
-Authorization: Bearer {token}
-```
-
----
-
-### Paso 9 — Ver el dashboard
-
-```http
-GET /api/solicitudes/dashboard
-Authorization: Bearer {token}
-```
-
-Respuesta:
-```json
-{
-  "totalSolicitudes": 1,
-  "pendientes": 0,
-  "enProceso": 0,
-  "atendidas": 0,
-  "rechazadas": 0,
-  "cerradas": 1,
-  "canceladas": 0,
-  "sinResponsable": 0,
-  "porTipo": {
-    "HOMOLOGACION": 1
-  }
-}
+PATCH /api/solicitudes/{codigo}/cerrar
+{ "adminId": "uuid-del-admin" }
 ```
 
 ---
@@ -368,10 +293,9 @@ Respuesta:
 
 | Método | Endpoint | Descripción |
 |--------|----------|-------------|
-| `POST` | `/api/usuarios` | Crear usuario |
+| `POST` | `/api/usuarios` | Crear usuario (público) |
 | `GET` | `/api/usuarios` | Listar usuarios |
 | `GET` | `/api/usuarios/buscar?email=` | Buscar por email |
-| `GET` | `/api/usuarios/buscar?nombre=` | Buscar por nombre |
 | `GET` | `/api/usuarios/{id}` | Obtener por ID |
 | `PUT` | `/api/usuarios/{id}` | Actualizar usuario |
 | `DELETE` | `/api/usuarios/{id}` | Eliminar usuario |
@@ -383,14 +307,7 @@ Respuesta:
 |--------|----------|-------------|
 | `POST` | `/api/solicitudes` | Registrar solicitud |
 | `GET` | `/api/solicitudes` | Listar con filtros y paginación |
-| `GET` | `/api/solicitudes/dashboard` | Resumen general del sistema |
-| `GET` | `/api/solicitudes/pendientes` | Solicitudes sin responsable |
-| `GET` | `/api/solicitudes/vencidas?dias=7` | Solicitudes sin resolver en N días |
-| `GET` | `/api/solicitudes/mis-solicitudes?solicitanteId=` | Solicitudes de un solicitante |
-| `GET` | `/api/solicitudes/asignadas-a-mi?responsableId=` | Solicitudes asignadas a un responsable |
-| `GET` | `/api/solicitudes/reporte/por-estado` | Reporte agrupado por estado |
-| `GET` | `/api/solicitudes/reporte/por-tipo` | Reporte agrupado por tipo |
-| `GET` | `/api/solicitudes/reporte/por-responsable` | Reporte por responsable |
+| `GET` | `/api/solicitudes/dashboard` | Resumen general |
 | `GET` | `/api/solicitudes/{codigo}` | Obtener por código |
 | `GET` | `/api/solicitudes/{codigo}/historial` | Historial de eventos |
 | `PATCH` | `/api/solicitudes/{codigo}/clasificar` | Clasificar solicitud |
@@ -400,17 +317,13 @@ Respuesta:
 | `PATCH` | `/api/solicitudes/{codigo}/cerrar` | Cerrar solicitud |
 | `PATCH` | `/api/solicitudes/{codigo}/cancelar` | Cancelar solicitud |
 
-### Filtros disponibles en `GET /api/solicitudes`
+### Inteligencia Artificial
 
-| Parámetro | Tipo | Descripción |
-|-----------|------|-------------|
-| `estado` | enum | CLASIFICACION, PENDIENTE, EN_PROCESO, ATENDIDA, RECHAZADA, CERRADA, CANCELADA |
-| `tipo` | enum | HOMOLOGACION, CANCELACION, SOLICITUD_CUPO, OTRO |
-| `prioridad` | enum | ALTA, MEDIA, BAJA |
-| `solicitanteId` | string | UUID del solicitante |
-| `page` | int | Número de página (default: 0) |
-| `size` | int | Tamaño de página (default: 10) |
-| `sortBy` | string | Campo de ordenamiento (default: fechaCreacion) |
+| Método | Endpoint | Descripción |
+|--------|----------|-------------|
+| `POST` | `/api/ia/sugerir-tipo` | Sugerir tipo de solicitud |
+| `POST` | `/api/ia/resumir` | Resumir descripción |
+| `POST` | `/api/ia/validar-descripcion` | Validar claridad de descripción |
 
 ---
 
@@ -418,7 +331,7 @@ Respuesta:
 
 ```
 CLASIFICACION → PENDIENTE → EN_PROCESO → ATENDIDA  → CERRADA
-                          ↘            → RECHAZADA → CERRADA
+                                       → RECHAZADA → CERRADA
               → CANCELADA (solo el solicitante, desde PENDIENTE)
 ```
 
@@ -432,6 +345,101 @@ CLASIFICACION → PENDIENTE → EN_PROCESO → ATENDIDA  → CERRADA
 | OTRO | BAJA |
 
 **Envejecimiento:** Si la solicitud lleva más de 3 días sin atenderse sube un nivel. Más de 7 días sube directamente a ALTA.
+
+---
+
+## Funcionalidades del Frontend
+
+### Roles y vistas
+
+| Rol | Vistas disponibles |
+|-----|--------------------|
+| ADMIN / ADMINISTRATIVO | Dashboard, Todas las solicitudes, Gestión de usuarios, Perfil |
+| ESTUDIANTE / DOCENTE | Mis solicitudes, Nueva solicitud, Perfil |
+
+### Características principales
+
+- **Login y registro** con componentes PrimeNG y validación reactiva
+- **Guards de ruta** por autenticación y rol
+- **Interceptor JWT** con refresh token automático
+- **Dashboard** con gráficas de torta (por estado) y barras (por tipo)
+- **Lista de solicitudes** con filtros por estado/tipo/prioridad, buscador y paginación
+- **Detalle de solicitud** con historial, acciones por rol y resumen IA
+- **Nueva solicitud** con análisis IA — sugerencia de tipo y validación de descripción
+- **Perfil de usuario** — ver y editar datos propios
+- **Gestión de usuarios** con confirmación `p-dialog` antes de eliminar
+- **Toasts** de notificación con PrimeNG
+- **Diseño institucional** con paleta de colores UniQuindío (verde y hueso)
+
+---
+
+## Estructura del Proyecto
+
+```
+proyecto/                          # Backend Spring Boot
+├── src/main/java/.../
+│   ├── domain/                    # Núcleo del negocio (DDD)
+│   │   ├── entity/
+│   │   ├── valueobject/
+│   │   ├── service/
+│   │   ├── repository/
+│   │   └── exception/
+│   ├── application/               # Casos de uso
+│   │   └── usecase/
+│   └── infrastructure/            # Adaptadores
+│       ├── ia/                    # Integración Groq IA
+│       ├── persistence/jpa/
+│       ├── rest/controllers/
+│       └── security/
+└── src/main/resources/
+    └── application.properties
+
+frontend/                          # Frontend Angular 21
+├── src/app/
+│   ├── componentes/
+│   │   ├── login/
+│   │   ├── registro/
+│   │   ├── dashboard/
+│   │   ├── lista-solicitudes/
+│   │   ├── solicitud-detalle/
+│   │   ├── nueva-solicitud/
+│   │   ├── usuarios/
+│   │   ├── perfil/
+│   │   ├── header/
+│   │   ├── footer/
+│   │   └── unauthorized/
+│   ├── guards/
+│   │   ├── auth.guard.ts
+│   │   ├── public-guard.ts
+│   │   └── roles-guard.ts
+│   ├── interceptores/
+│   │   └── auth.interceptor.ts
+│   ├── servicios/
+│   │   ├── auth.service.ts
+│   │   ├── solicitudes.service.ts
+│   │   └── notificacion.service.ts
+│   └── modelos/
+└── angular.json
+```
+
+---
+
+## Decisiones de Diseño Clave
+
+**¿Por qué H2 en lugar de PostgreSQL?**  
+H2 permite desarrollo y pruebas sin instalación adicional. En producción se migraría a PostgreSQL.
+
+**¿Por qué entidades JPA separadas del dominio?**  
+Para respetar la arquitectura hexagonal. Las entidades de dominio no conocen `@Entity` ni anotaciones de persistencia.
+
+**¿Por qué JWT con HMAC/HS256?**  
+Es simétrico, sin necesidad de infraestructura de clave pública/privada, adecuado para sistemas monolíticos.
+
+**¿Por qué la IA es opcional (RF-11)?**  
+El sistema debe ser autónomo. Si Groq falla o no hay conexión, todas las funcionalidades principales siguen operando. La IA es un plus que mejora la experiencia pero no es un componente crítico.
+
+**¿Por qué Groq en lugar de OpenAI?**  
+Groq es gratuito con límites generosos y ofrece el modelo LLaMA 3.3 70B que es suficientemente potente para las tareas del sistema.
 
 ---
 
@@ -449,121 +457,3 @@ CLASIFICACION → PENDIENTE → EN_PROCESO → ATENDIDA  → CERRADA
 | `409` | Conflicto (ej. email duplicado) |
 | `422` | Violación de regla de negocio del dominio |
 | `500` | Error interno del servidor |
-
----
-
-## Estructura del Proyecto
-
-```
-src/main/java/co/edu/uniquindio/proyecto/
-├── domain/
-│   ├── entity/
-│   │   ├── Solicitud.java              # Agregado Raíz
-│   │   └── Usuario.java               # Entidad
-│   ├── valueobject/
-│   │   ├── CodigoSolicitud.java
-│   │   ├── Email.java
-│   │   ├── EstadoSolicitud.java
-│   │   ├── EventoHistorial.java
-│   │   ├── Prioridad.java             # Con envejecimiento automático
-│   │   ├── TipoSolicitud.java
-│   │   └── TipoUsuario.java
-│   ├── service/
-│   │   ├── GestorSolicitudService.java
-│   │   └── NotificacionService.java   # Puerto de notificaciones
-│   ├── repository/
-│   │   ├── SolicitudRepository.java
-│   │   └── UsuarioRepository.java
-│   └── exception/
-│       ├── ReglaDominioException.java
-│       ├── SolicitudNoEncontradaException.java
-│       ├── UsuarioNoEncontradoException.java
-│       └── UsuarioNoAutorizadoException.java
-├── application/
-│   ├── usecase/
-│   │   ├── CrearSolicitudUseCase.java
-│   │   ├── ClasificarSolicitudUseCase.java
-│   │   ├── EnRevisionUseCase.java
-│   │   ├── AtenderSolicitudUseCase.java
-│   │   ├── RechazarSolicitudUseCase.java
-│   │   ├── CerrarSolicitudUseCase.java
-│   │   ├── CancelarSolicitudUseCase.java
-│   │   ├── ConsultarSolicitudesPorEstadoUseCase.java
-│   │   ├── CrearUsuarioUseCase.java
-│   │   ├── ConsultarUsuariosUseCase.java
-│   │   ├── ActualizarUsuarioUseCase.java
-│   │   ├── EliminarUsuarioUseCase.java
-│   │   └── BuscarUsuariosUseCase.java
-│   ├── dto/
-│   │   ├── request/
-│   │   └── response/
-│   └── service/
-│       └── SecurityService.java
-└── infrastructure/
-    ├── config/
-    │   ├── H2ConsoleConfig.java
-    │   └── SwaggerConfig.java
-    ├── config/setup/
-    │   ├── DefaultUserInitializer.java
-    │   └── DefaultUserProperties.java
-    ├── notification/
-    │   └── LogNotificacionService.java
-    ├── persistence/jpa/
-    │   ├── entity/
-    │   ├── mapper/
-    │   ├── SolicitudJpaDataRepository.java
-    │   ├── UsuarioJpaDataRepository.java
-    │   ├── SolicitudJpaRepository.java
-    │   └── UsuarioJpaRepository.java
-    ├── rest/
-    │   ├── controllers/
-    │   │   ├── SolicitudController.java
-    │   │   ├── UsuarioController.java
-    │   │   └── SecurityController.java
-    │   ├── dto/
-    │   ├── mapper/
-    │   └── GlobalExceptionHandler.java
-    └── security/
-        ├── SecurityConfig.java
-        ├── JwtConfig.java
-        ├── JwtTokenProvider.java
-        ├── JwtBlacklistFilter.java
-        ├── TokenBlacklist.java
-        ├── CustomUserDetails.java
-        ├── UserConfig.java
-        └── services/
-            └── SecurityServiceImpl.java
-```
-
----
-
-## Documentación Adicional
-
-La carpeta `/docs` contiene:
-
-| Documento | Descripción |
-|-----------|-------------|
-| `glosario-lenguaje-ubicuo.md` | Definición de todos los términos clave del dominio |
-| `diagrama-clases.md` | Diagrama de clases UML del modelo de dominio |
-| `diagrama-estados.md` | Diagrama del ciclo de vida de una solicitud |
-| `reglas-de-negocio.md` | Documentación de las 18 reglas de negocio |
-| `api.yml` | Especificación OpenAPI 3.0 de todos los endpoints |
-
----
-
-## Decisiones de Diseño Clave
-
-**¿Por qué H2 en lugar de MongoDB?**  
-La Entrega 02 requiere persistencia relacional con JPA/Hibernate siguiendo las guías del curso. H2 permite desarrollo y pruebas sin instalación adicional.
-
-**¿Por qué entidades JPA separadas del dominio?**  
-Para respetar la arquitectura hexagonal. Las entidades de dominio no deben conocer `@Entity`, `@Column` ni ninguna anotación de persistencia. El adaptador JPA hace la traducción.
-
-**¿Por qué JWT con HMAC/HS256?**  
-Es simétrico, sin necesidad de infraestructura de clave pública/privada, adecuado para sistemas monolíticos. El secreto se configura en `application.properties`.
-
-**¿Por qué `TokenBlacklist` en memoria?**  
-Para desarrollo y pruebas es suficiente. En producción se reemplazaría por Redis para persistencia distribuida del blacklist.
-
-**¿Por qué `LinkedHashSet` para el historial?**  
-Garantiza orden cronológico de inserción y ausencia de duplicados simultáneamente.
